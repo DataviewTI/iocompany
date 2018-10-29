@@ -1,0 +1,26 @@
+.dropzone{
+  overflow:hidden;
+  height:133px!important;
+  background-size:95% auto!important;
+}
+.dropzone.dz-clickable{
+  border:none!important;
+}
+
+.form-control[disabled] {
+  opacity: 1!important;
+  background-color: transparent!important;
+}
+
+.nav-item a.active{
+  background-color:transparent!important;
+}
+
+.minicolors-sprite {
+  background-image: url('/io/images/plugins/jquery.minicolors.png');
+}
+
+.minicolors input{
+ border:none;
+ background-color:transparent;
+}

@@ -1,0 +1,34 @@
+{
+  "description": "Serviço de cadastro de empresas Palm Job",
+  "license": "MIT",
+  "main": "wploader.js",
+  "name": "intranetone-company",
+  "version": "0.0.1",
+  "maintainers": [
+    {
+      "name": "Marcelo Disconzi",
+      "email": "mdisconzi@gmail.com"
+    },
+    {
+      "name": "Thiago Brauer",
+      "email": "thiagobrauer@gmail.com"
+    }
+  ],
+  "keywords": [
+    "Laravel",
+    "IntranetOne",
+    "Intranet CMS",
+    "Dataview",
+    "Configuration",
+    "Customization",
+    "Profile"
+  ],
+  "IODependencies": {
+    "dropzone": "^5.1.1",
+    "cropperjs": "^1.3.6",
+    "jquery-cropper": "^1.0.0"
+  },
+  "ignore": [
+    "node_modules"
+  ]
+}
