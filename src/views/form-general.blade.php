@@ -1,82 +1,94 @@
 <div class = 'row'>
-    <div class="col-md col-sm-12 pl-1" style = 'border-right:1px #e1f0ee solid'>
-      <div class = 'row'>
-        <div class="col-6">
-          <div class="form-group">
-            <label for = 'first_name' class="bmd-label-floating __required">Nome</label>
-            <input name = 'first_name' type = 'text' class = 'form-control form-control-lg' />
-          </div>
-        </div>
-        <div class="col-6">
-          <div class="form-group">
-            <label for = 'last_name' class="bmd-label-floating __required">Sobrenome</label>
-            <input name = 'last_name' type = 'text' class = 'form-control form-control-lg' />
-          </div>
-        </div>
-      </div>
-
-      <div class = 'row'>
-        <div class="col-8">
-          <div class="form-group">
-            <label for = 'email' class="bmd-label-floating __required">Email</label>
-            <input name = 'email' type = 'text' class = 'form-control form-control-lg' />
-          </div>
-        </div>
-        <div class="col-4">
-          <div class="form-group">
-            <label for = 'admin' class="bmd-label-floating __required">Administrador?</label>
-            <br>
-            <button type="button" class="btn btn-lg aanjulena-btn-toggle btn-lg active"
-                    data-toggle="button" aria-pressed="true" 
-                    data-default-state='true' autocomplete="off" name = 'admin' id = 'admin'
-                    style="margin: 0; margin-left: 40px; margin-top: 10px;">
-                <div class="handle"></div>
-            </button>
-            <input type = 'hidden' name = '__admin' id = '__admin' />
-          </div>
-        </div>
-      </div>
-
-      <div class = 'row'>
-        <div class="col-6">
-          <div class="form-group">
-            <label for = 'password' class="bmd-label-floating __required">Senha</label>
-            <input name = 'password' type = 'password' class = 'form-control form-control-lg' />
-          </div>
-        </div>
-        <div class="col-6">
-          <div class="form-group">
-            <label for = 'confirm_password' class="bmd-label-floating __required">Confirme a senha</label>
-            <input name = 'confirm_password' type = 'password' class = 'form-control form-control-lg' />
-          </div>
-        </div>
-      </div>
-      
+  <div class="col-sm-3 col-xs-12 pl-0">
+    <div class="form-group">
+      <label for = 'cnpj' class="bmd-label-floating __required">CNPJ</label>
+      <input name = 'cnpj' type = 'text' id = 'cnpj' class = 'form-control form-control-lg' />
     </div>
-    <!-- coluna B-->
-    @if(Sentinel::inRole('admin'))
-      <div class="col-md col-sm-12 pr-1">
-    @else
-      <div class="col-md col-sm-12 pr-1 d-none">
-    @endif
-      <h4><i class = ''></i> 
-        <span class = 'text-default'><small>Permissões</small></span></h4>
-      <hr />
-      <div class = 'row'>
-        <!--tabela-->
-        <div class="col-12">
-          @component('IntranetOne::io.components.datatable',[
-          "_id" => "permissions_table",
-          "_columns"=> [
-              ["title" => "Serviço"],
-              ["title" => "Criar"],
-              ["title" => "Alterar"],
-              ["title" => "Excluir"],
-              ["title" => "Visualizar"],
-            ]
-          ])
-          @endcomponent
+  </div>
+  <div class="col-sm-5 col-xs-12">
+    <div class="form-group">
+      <label for = 'razaoSocial' class="bmd-label-floating __required">Razão Social</label>
+      <input name = 'razaoSocial' type = 'text' id = 'razaoSocial' class = 'form-control form-control-lg' />
+    </div>
+  </div>
+  <div class="col-sm-4 col-xs-12 pr-0">
+    <div class="form-group">
+      <label for = 'nomeFantasia' class="bmd-label-floating __required">Nome Fantasia</label>
+      <input name = 'nomeFantasia' type = 'text' id = 'nomeFantasia' class = 'form-control form-control-lg' />
+    </div>
+  </div>
+</div>
+
+<div class = 'row'>
+  <div class="col-sm-7 col-xs-12 p-0">
+    <div class = 'row'>
+      <div class="col-sm-3 col-xs-12">
+        <div class="form-group">
+          <label for = 'phone' class="bmd-label-floating __required">Telefone Fixo</label>
+          <input name = 'phone' type = 'tel' id = 'phone' class = 'form-control form-control-lg' />
+        </div>
+      </div>
+      <div class="col-sm-3 col-xs-12">
+        <div class="form-group">
+          <label for = 'mobile' class="bmd-label-floating">Celular/WhatsApp</label>
+          <input name = 'mobile' type = 'tel' id = 'mobile' class = 'form-control form-control-lg' />
+        </div>
+      </div>
+      <div class="col-sm-6 col-xs-12">
+        <div class="form-group">
+          <label for = 'email' class="bmd-label-floating __required">Email</label>
+          <input name = 'email' type = 'email' id = 'email' class = 'form-control form-control-lg' />
         </div>
       </div>
     </div>
   </div>
+</div>
+
+
+<div class = 'row'>
+  <div class="col-sm-7 col-xs-12 pl-0">
+    <div class = 'row'>
+      <div class="col-sm-2 col-xs-12 pr-0">
+        <div class="form-group">
+          <label for = 'zipCode' class="bmd-label-floating __required">CEP</label>
+          <input name = 'zipCode' type = 'tel' id = 'zipCode' class = 'form-control form-control-lg' />
+        </div>
+      </div>
+      <div class="col-sm-8 col-xs-12">
+        <div class="form-group">
+          <label for = 'address' class="bmd-label-floating __required">Logradrouro</label>
+          <input name = 'address' type = 'text' id = 'address' class = 'form-control form-control-lg' />
+        </div>
+      </div>
+      <div class="col-sm-2 col-xs-12">
+        <div class="form-group">
+          <label for = 'numberApto' class="bmd-label-floating __required">Nº / Apto</label>
+          <input name = 'numberApto' type = 'text' id = 'numberApto' class = 'form-control form-control-lg' />
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-5 col-xs-12">
+    <div class = 'row'>
+      <div class="col-sm-5 col-xs-12 pl-0">
+        <div class="form-group">
+          <label for = 'address2' class="bmd-label-floating __required">Bairro</label>
+          <input name = 'address2' type = 'text' id = 'address2' class = 'form-control form-control-lg' />
+        </div>
+      </div>
+      <div class="col-sm-6 col-xs-9 pl-0">
+        <div class="form-group">
+          <label for = 'city' class="bmd-label-floating __required">Cidade</label>
+          <input name = 'city' type = 'tel' id = 'city' data-ibge = '' class = 'form-control form-control-lg' disabled/>
+          <input name = '__city' type = 'hidden' id = '__city' />
+        </div>
+      </div>
+      <div class="col-sm-1 col-xs-3 px-0">
+        <div class="form-group">
+          <label for = 'state' class="bmd-label-floating __required">UF</label>
+          <input name = 'state' type = 'state' id = 'state' class = 'form-control form-control-lg' disabled />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

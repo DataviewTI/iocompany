@@ -12,6 +12,7 @@ class IOCompanyServiceProvider extends ServiceProvider
 
   public function boot(){
     $this->loadViewsFrom(__DIR__.'/views', 'Company');
+    $this->loadViewsFrom(__DIR__.'/views/jobs', 'Job');
   }
 
   public function register(){
@@ -25,6 +26,8 @@ class IOCompanyServiceProvider extends ServiceProvider
   });
   
     $this->app->make('Dataview\IOCompany\CompanyController');
+    $this->app->make('Dataview\IOCompany\JobController');
     $this->app->make('Dataview\IOCompany\CompanyRequest');
+    $this->app->make('Dataview\IOCompany\JobRequest');
   }
 }

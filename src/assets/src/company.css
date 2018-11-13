@@ -1,12 +1,3 @@
-.dropzone{
-  overflow:hidden;
-  height:133px!important;
-  background-size:95% auto!important;
-}
-.dropzone.dz-clickable{
-  border:none!important;
-}
-
 .form-control[disabled] {
   opacity: 1!important;
   background-color: transparent!important;
@@ -16,11 +7,7 @@
   background-color:transparent!important;
 }
 
-.minicolors-sprite {
-  background-image: url('/io/images/plugins/jquery.minicolors.png');
-}
-
-.minicolors input{
- border:none;
- background-color:transparent;
+.custom-select{
+  padding-top:5px!important;
+  background: transparent url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 .5 3'%3E%3Cpath fill='%23343a40' d='M2 0L0 2h4zm0 3L0 3h4z'/%3E%3C/svg%3E") no-repeat right 12px;
 }

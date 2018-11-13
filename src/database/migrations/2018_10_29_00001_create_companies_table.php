@@ -11,20 +11,20 @@ class CreateCompaniesTable extends Migration
 			Schema::create('companies', function(Blueprint $table)
 			{
 				$table->char('cnpj',14);
-				$table->char('razaoSocial',50);
+        $table->primary('cnpj');
+        $table->char('razaoSocial',50);
 				$table->char('nomeFantasia',50);
         $table->char('inscEstadual', 20)->nullable();
-        $table->char('telefone1', 15)->nullable();
-        $table->char('telefone2', 15)->nullable();
-        $table->char('celular1',15)->nullable();
-        $table->char('celular2',15)->nullable();
+        $table->char('phone', 15)->nullable();
+        $table->char('phone2', 15)->nullable();
+        $table->char('mobile',15)->nullable();
+        $table->char('mobile2',15)->nullable();
         $table->string('email')->nullable();
-        $table->char('cep',9)->nullable();
-        $table->string('logradouro')->nullable();
-        $table->char('numero',20)->nullable();
-        $table->string('complemento')->nullable();
-        $table->string('bairro')->nullable();
-        $table->integer('city_id')->unsigned();
+        $table->char('zipCode',9);
+        $table->string('address');
+        $table->string('address2')->nullable();
+        $table->char('numberApto',20);
+        $table->char('city_id',7);
         $table->integer('group_id')->unsigned()->nullable();
 				$table->string('description')->nullable();
 				$table->text('data')->nullable();

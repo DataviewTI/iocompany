@@ -9,6 +9,7 @@ use App\Http\Requests;
 use Illuminate\Http\Request;
 use Dataview\IOCompany\CompanyRequest;
 use Dataview\IOCompany\Company;
+use Dataview\IOCompany\CBOOccupation;
 use Dataview\IntranetOne\Group;
 use Validator;
 use DataTables;
@@ -25,8 +26,15 @@ class CompanyController extends IOController{
 		return view('Company::index');
 	}
 	
-	public function list(){
-    $query = Company::select('cnpj')
+	public function simplifiedList(){
+
+    $query = Company::select("cnpj",'razaoSocial','nomeFantasia')->get();
+  
+    return json_encode($query);
+  }
+  
+  	public function list(){
+    $query = Company::select('cnpj','razaoSocial','nomeFantasia')
     ->with([
       'group'=>function($query){
         $query->select('groups.id','sizes');
@@ -37,19 +45,37 @@ class CompanyController extends IOController{
     return Datatables::of(collect($query))->make(true);
   }
 
+
+	public function cboList($kw=null){
+    $query = CBOOccupation::select('id as i','occupation as o');
+
+    // $query->where('occupation','like',('%'.$kw.'%'))
+    //   ->with([
+    //       'synonym'=>function($query){
+    //       $query->select('groups.id','sizes')
+    //       ->with('files');
+    //     },
+    //   ])
+    //   ->limit(200);
+  
+    return Datatables::of(collect($query->get()))->make(true);
+  }
+  
+    
+
 	public function create(CompanyRequest $request){
     $check = $this->__create($request);
     if(!$check['status'])
       return response()->json(['errors' => $check['errors'] ], $check['code']);	
       
     $obj = new Company($request->all());
-    if($request->sizes!= null){
-      $obj->setAppend("sizes",$request->sizes);
-      //$obj->setAppend("has_images",$request->has_images);
-      $obj->save();
-    }
+    // if($request->sizes!= null){
+    //   $obj->setAppend("sizes",$request->sizes);
+    //   //$obj->setAppend("has_images",$request->has_images);
+    //   $obj->save();
+    // }
     //if($request->sizes!= null && $request->has_images>0){
-      $obj->group->manageImages(json_decode($request->__dz_images),json_decode($request->sizes));
+      //$obj->group->manageImages(json_decode($request->__dz_images),json_decode($request->sizes));
       $obj->save();
     //}
 
@@ -57,18 +83,19 @@ class CompanyController extends IOController{
 	}
 
   public function view($id){
+
     $check = $this->__view();
     if(!$check['status'])
       return response()->json(['errors' => $check['errors'] ], $check['code']);	
 
-    $query = Company::select('cnpj')
+    $query = Company::select('cnpj','razaoSocial','nomeFantasia','phone','mobile','zipCode','address','address2','city_id','email','numberApto')
       ->with([
           'group'=>function($query){
           $query->select('groups.id','sizes')
           ->with('files');
         },
       ])
-      ->where('id',$id)
+      ->where('cnpj',$id)
       ->get();
 				
 			return response()->json(['success'=>true,'data'=>$query]);
@@ -82,29 +109,27 @@ class CompanyController extends IOController{
       $_new = (object) $request->all();
       $_old = Company::find($id);
       
-      $upd = [];
+      $upd = ['address','address2','city_id','email','phone','mobile','nomeFantasia','razaoSocial','zipCode','numberApto'];
 
       foreach($upd as $u)
         $_old->{$u} = $_new->{$u};
       
-      if($_old->group != null){
-        $_old->group->sizes = $_new->sizes;
-        $_old->group->manageImages(json_decode($_new->__dz_images),json_decode($_new->sizes));
-        $_old->group->save();
-      }
-      else{
-        if(count(json_decode($_new->__dz_images))>0){
-          $_old->group()->associate(Group::create([
-            'group' => "Avatar da configuração ".$id,
-            'sizes' => $_new->sizes
-            ])
-          );
-          $_old->group->manageImages(json_decode($_new->__dz_images),json_decode($_new->sizes));
-				}
-      }
+      // if($_old->group != null){
+      //   $_old->group->sizes = $_new->sizes;
+      //   $_old->group->manageImages(json_decode($_new->__dz_images),json_decode($_new->sizes));
+      //   $_old->group->save();
+      // }
+      // else{
+      //   if(count(json_decode($_new->__dz_images))>0){
+      //     $_old->group()->associate(Group::create([
+      //       'group' => "Avatar da configuração ".$id,
+      //       'sizes' => $_new->sizes
+      //       ])
+      //     );
+      //     $_old->group->manageImages(json_decode($_new->__dz_images),json_decode($_new->sizes));
+			// 	}
+      // }
 		
-      $_old->save();
-
 			return response()->json(['success'=>$_old->save()]);
 	}
 

@@ -24,9 +24,8 @@
     "Profile"
   ],
   "IODependencies": {
-    "dropzone": "^5.1.1",
-    "cropperjs": "^1.3.6",
-    "jquery-cropper": "^1.0.0"
+    "devbridge-autocomplete": "^1.4.7",
+    "moment": "^2.21.0"
   },
   "ignore": [
     "node_modules"

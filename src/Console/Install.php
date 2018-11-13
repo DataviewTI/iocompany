@@ -2,7 +2,7 @@
 namespace Dataview\IOCompany\Console;
 use Dataview\IntranetOne\Console\IOServiceInstallCmd;
 use Dataview\IOCompany\IOCompanyServiceProvider;
-use Dataview\IOCompany\CompanySeeder;
+use Dataview\IOCompany\ServiceSeeder;
 
 class Install extends IOServiceInstallCmd
 {
@@ -10,7 +10,7 @@ class Install extends IOServiceInstallCmd
     parent::__construct([
       "service"=>"company",
       "provider"=> IOCompanyServiceProvider::class,
-      "seeder"=>CompanySeeder::class,
+      "seeder"=>ServiceSeeder::class,
     ]);
   }
 

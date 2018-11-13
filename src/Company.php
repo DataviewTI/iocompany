@@ -2,16 +2,25 @@
 namespace Dataview\IOCompany;
 
 use Dataview\IntranetOne\IOModel;
-use Dataview\IntranetOne\File as ProjectFile;
+// use Dataview\IntranetOne\File as ProjectFile;
 use Dataview\IntranetOne\Group;
-use Illuminate\Support\Facades\Storage;
+// use Illuminate\Support\Facades\Storage;
 
 class Company extends IOModel
 {
-  protected $fillable = ['cnpj'];
+  protected  $primaryKey = 'cnpj';
+  public $incrementing = false;
+
+  protected $fillable = ['cnpj','razaoSocial','nomeFantasia','phone1','phone','mobile','mobile2','email','zipCode','address','address2','numberApto','city_id','group_id','description','data'];
+
+  protected $appends = [
+    'group' => false,
+  ];
+
 
   protected $casts = [
     'data' => 'array',
+    'cnpj' => 'string'
   ];
 
   public function group(){
@@ -20,7 +29,6 @@ class Company extends IOModel
 
   public static function boot(){
     parent::boot(); 
-
     static::created(function (Company $obj) {
         if($obj->getAppend("group") !== false){
           $group = new Group([
