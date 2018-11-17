@@ -17,11 +17,11 @@ php artisan io-company:install
 ...
 let company = require('io-company');
 io.compile({
-  services:{
+  services:[
     ...
-    new company()
+    new company(),
     ...
-  }
+  ]
 });
 
 ```
