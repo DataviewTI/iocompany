@@ -15,7 +15,7 @@ php artisan io-company:install
 - Configure o webpack conforme abaixo 
 ```js
 ...
-let slide = require('io-company');
+let company = require('io-company');
 io.compile({
   services:{
     ...
