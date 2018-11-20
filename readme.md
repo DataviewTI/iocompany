@@ -15,7 +15,7 @@ php artisan io-company:install
 - Configure o webpack conforme abaixo 
 ```js
 ...
-let company = require('io-company');
+let company = require('intranetone-company');
 io.compile({
   services:[
     ...
