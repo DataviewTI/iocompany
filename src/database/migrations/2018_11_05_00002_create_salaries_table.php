@@ -8,13 +8,13 @@ class CreateSalariesTable extends Migration
 {
     public function up()
     {
-			Schema::create('salaries', function(Blueprint $table){
-				$table->increments('id');
-        $table->char('salary',40);
-        $table->tinyInteger('order')->unsigned();        
-        $table->timestamps();
-        $table->softDeletes();
-			});
+        Schema::create('salaries', function(Blueprint $table){
+            $table->increments('id');
+            $table->char('salary',40);
+            $table->tinyInteger('order')->unsigned();        
+            $table->timestamps();
+            $table->softDeletes();
+        });
 
     }
 

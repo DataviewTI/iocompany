@@ -9,6 +9,11 @@ class Feature extends Model
   protected $fillable = ['feature'];
 
   public function profiles(){
-      return $this->belongsToMany('Dataview\IOCompany\Profile');
+    return $this->belongsToMany('Dataview\IOCompany\Profile');
   }
+
+  public function jobs(){
+    return $this->belongsToMany('Dataview\IOCompany\Job', 'feature_job');
+  }
+
 }

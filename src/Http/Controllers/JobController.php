@@ -9,7 +9,10 @@ use App\Http\Requests;
 use Illuminate\Http\Request;
 use Dataview\IOCompany\JobRequest;
 use Dataview\IOCompany\Company;
+use Dataview\IOCompany\PcdType;
 use Dataview\IOCompany\Job;
+use Dataview\IOCompany\Salary;
+use Dataview\IOCompany\Degree;
 use Dataview\IOCompany\CBOOccupation;
 use Dataview\IntranetOne\Group;
 use Validator;
@@ -28,14 +31,15 @@ class JobController extends IOController{
 	}
  
   public function list(){
-    $query = Job::select('cnpj','razaoSocial','nomeFantasia')
-    ->with([
-      'group'=>function($query){
-        $query->select('groups.id','sizes');
-      }
-    ])
-    ->get();
-    
+    $query = Job::where('id', '!=', 'null')->with([
+      'profile',
+      'degree',
+      'company',
+      'cboOccupation',
+      'salary',
+      'pcdType',
+    ])->get();
+
     return Datatables::of(collect($query))->make(true);
   }
 
@@ -49,18 +53,41 @@ class JobController extends IOController{
     $check = $this->__create($request);
     if(!$check['status'])
       return response()->json(['errors' => $check['errors'] ], $check['code']);	
-      
-    $obj = new Job($request->all());
-    // if($request->sizes!= null){
-    //   $obj->setAppend("sizes",$request->sizes);
-    //   //$obj->setAppend("has_images",$request->has_images);
-    //   $obj->save();
-    // }
-    //if($request->sizes!= null && $request->has_images>0){
-      //$obj->group->manageImages(json_decode($request->__dz_images),json_decode($request->sizes));
-      $obj->save();
-    //}
 
+    $obj = new Job($request->all());
+
+    $obj->cboOccupation()->associate(
+      CBOOccupation::where('occupation',$request->cbo)->first()
+    );
+
+    $obj->profile()->associate(
+      Profile::find($request->profile)
+    );
+
+    $obj->company()->associate(
+      Company::where('razaoSocial',$request->filterCompany)->first()
+    );
+
+    $obj->degree()->associate(
+      Degree::find($request->degree)
+    );
+
+    $obj->salary()->associate(
+      Salary::find($request->salary)
+    );
+
+    if($request->pcd != "" && $request->pcd != null){
+      $obj->pcdType()->associate(
+        PcdType::find($request->pcd)
+      );
+    } 
+    $obj->save();
+
+    foreach(explode(",", $request->__features) as $featureId){
+      $obj->features()->attach(Feature::find($featureId));
+    }
+
+    $obj->save();
     return response()->json(['success'=>true,'data'=>null]);
 	}
 
@@ -70,49 +97,70 @@ class JobController extends IOController{
     if(!$check['status'])
       return response()->json(['errors' => $check['errors'] ], $check['code']);	
 
-    $query = Job::select('cnpj','razaoSocial','nomeFantasia','phone','mobile','zipCode','address','address2','city_id','email','numberApto')
-      ->with([
-          'group'=>function($query){
-          $query->select('groups.id','sizes')
-          ->with('files');
-        },
-      ])
-      ->where('cnpj',$id)
-      ->get();
+    $query = $query = Job::where('id', $id)->with([
+      'profile',
+      'degree',
+      'company',
+      'cboOccupation',
+      'salary',
+      'pcdType',
+      'features',
+    ])->get();
 				
-			return response()->json(['success'=>true,'data'=>$query]);
+    return response()->json(['success'=>true,'data'=>$query]);
 	}
 	
-	public function update($id,JobRequest $request){
+	public function update($id, JobRequest $request){
     $check = $this->__update($request);
     if(!$check['status'])
-      return response()->json(['errors' => $check['errors'] ], $check['code']);	
+      return response()->json(['errors' => $check['errors']], $check['code']);	
 
-      $_new = (object) $request->all();
-      $_old = Job::find($id);
-      
-      $upd = ['address','address2','city_id','email','phone','mobile','nomeFantasia','razaoSocial','zipCode','numberApto'];
+    $_old = Job::find($id);
+    $_old->date_start = $request->date_start;
+    $_old->date_end = $request->date_end;
+    $_old->interval = $request->interval;
+    $_old->gender = $request->gender;
+    $_old->apprentice = $request->apprentice;
+    $_old->observations = $request->observations;
+    
+    $_old->cboOccupation()->associate(
+      CBOOccupation::where('occupation',$request->cbo)->first()
+    );
 
-      foreach($upd as $u)
-        $_old->{$u} = $_new->{$u};
-      
-      // if($_old->group != null){
-      //   $_old->group->sizes = $_new->sizes;
-      //   $_old->group->manageImages(json_decode($_new->__dz_images),json_decode($_new->sizes));
-      //   $_old->group->save();
-      // }
-      // else{
-      //   if(count(json_decode($_new->__dz_images))>0){
-      //     $_old->group()->associate(Group::create([
-      //       'group' => "Avatar da configuração ".$id,
-      //       'sizes' => $_new->sizes
-      //       ])
-      //     );
-      //     $_old->group->manageImages(json_decode($_new->__dz_images),json_decode($_new->sizes));
-			// 	}
-      // }
-		
-			return response()->json(['success'=>$_old->save()]);
+    $_old->profile()->associate(
+      Profile::find($request->profile)
+    );
+
+    $_old->company()->associate(
+      Company::where('razaoSocial',$request->filterCompany)->first()
+    );
+
+    $_old->degree()->associate(
+      Degree::find($request->degree)
+    );
+
+    $_old->salary()->associate(
+      Salary::find($request->salary)
+    );
+
+    if($request->pcd != "" && $request->pcd != null){
+      $_old->pcdType()->associate(
+        PcdType::find($request->pcd)
+      );
+    } else {
+      $_old->pcd_type_id = null;
+    }
+    foreach ($_old->features as $feature) {
+      $_old->features()->detach($feature);
+    }
+
+    foreach(explode(",", $request->__features) as $featureId){
+      $_old->features()->attach(Feature::find($featureId));
+    }
+
+    $_old->save();
+    
+    return response()->json(['success'=>$_old->save()]);
 	}
 
   public function delete($id){
@@ -120,9 +168,9 @@ class JobController extends IOController{
     if(!$check['status'])
       return response()->json(['errors' => $check['errors'] ], $check['code']);	
 
-      $obj = Job::find($id);
-			$obj = $obj->delete();
-			return  json_encode(['sts'=>$obj]);
+    $obj = Job::find($id);
+    $obj = $obj->delete();
+    return  json_encode(['sts'=>$obj]);
   }
 
 }

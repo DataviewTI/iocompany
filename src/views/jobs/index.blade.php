@@ -3,7 +3,7 @@
 {{-- page level styles --}}
 @section('header_styles')
 <link rel="stylesheet" type="text/css" href="{{ asset('css/pickadate-full.min.css') }}">
-<link rel="stylesheet" type="text/css" href="{{ asset('io/services/io-company.min.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ asset('io/services/io-job.min.css') }}">
 @stop
 
 @section('main-heading')
@@ -14,7 +14,7 @@
 			@component('IntranetOne::io.components.nav-tabs',
 			[
 				"_id" => "vj-default-tablist",
-				"_active"=>1,
+				"_active"=>0,
 				"_tabs"=> [
 					[
 						"tab"=>"Listar",

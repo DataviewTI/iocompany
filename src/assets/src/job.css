@@ -1,0 +1,17 @@
+.form-control[disabled] {
+  opacity: 1!important;
+  background-color: transparent!important;
+}
+
+.nav-item a.active{
+  background-color:transparent!important;
+}
+
+.custom-select{
+  padding-top:5px!important;
+  background: transparent url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 .5 3'%3E%3Cpath fill='%23343a40' d='M2 0L0 2h4zm0 3L0 3h4z'/%3E%3C/svg%3E") no-repeat right 12px;
+}
+
+.features-group{
+  display: none;
+}

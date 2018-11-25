@@ -27,6 +27,11 @@ class Company extends IOModel
     return $this->belongsTo('Dataview\IntranetOne\Group');
   }
 
+  public function jobs()
+  {
+    return $this->hasMany('Dataview\IOCompany\Job');
+  }
+
   public static function boot(){
     parent::boot(); 
     static::created(function (Company $obj) {

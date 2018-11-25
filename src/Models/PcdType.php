@@ -4,16 +4,18 @@ namespace Dataview\IOCompany;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Profile extends Model
+class PcdType extends Model
 {
-  protected $fillable = ['profile'];
+  protected $fillable = ['title', 'order'];
 
-  public function features(){
-    return $this->belongsToMany('Dataview\IOCompany\Feature');
+  public function candidates()
+  {
+    return $this->hasMany('Dataview\IOCompany\Candidate');
   }
 
   public function jobs()
   {
     return $this->hasMany('Dataview\IOCompany\Job');
   }
+  
 }

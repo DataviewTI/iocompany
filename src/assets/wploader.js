@@ -43,12 +43,24 @@ function IOCompany(params={}){
 
     mix.copy($.dep.service+'optimized_cbo.js', 'public/js/optimized_cbo.js');
 
+    mix.styles([
+      IO.src.io.root+'custom/custom-devbridge.css',
+      $.dep.service + 'job.css',
+      IO.dep.io.toastr + 'toastr.min.css',
+      IO.src.io.css + 'toastr.css',
+    ], IO.dest.io.root + 'services/io-job.min.css');
+
     mix.babel([
       $.dep.devbridgeAC+'jquery.autocomplete.min.js',
       IO.dep.io.toastr + 'toastr.min.js',
       IO.src.io.js + 'defaults/def-toastr.js',
       $.dep.service+'job.js',
     ], IO.dest.io.root + 'services/io-jobs.min.js');
+
+    mix.js([
+      $.dep.moment + 'moment.js',
+      $.dep.service+'candidate.js',
+    ], IO.dest.io.root + 'services/io-candidates.min.js');
 
 
     callback(IO);

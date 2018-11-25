@@ -3,14 +3,18 @@
   use Dataview\IOCompany\Feature;
   use Dataview\IOCompany\Degree;
   use Dataview\IOCompany\Salary;
+  use Dataview\IOCompany\PcdType;
   use Carbon\Carbon;
 
   $profiles = Profile::select('id','profile')->orderBy('profile')->get();
   $degrees = Degree::select('id','degree')->orderBy('order')->get();
   $salaries = Salary::select('id','salary')->orderBy('order')->get();
+  $pcdTypes = PcdType::select('id','title')->orderBy('order')->get();
 
-  $feats = Profile::find(1)->features()->get();
-
+  $feats = array();
+  foreach ($profiles as $profile) {
+    array_push($feats, ['profile' => $profile->id, 'features' => Profile::find($profile->id)->features()->get()]);
+  }
 @endphp
 
 <div class = 'row'>
@@ -24,8 +28,8 @@
     <div class = 'row'>
       <div class="col-sm-3 col-xs-12">
         <div class="form-group">
-          <label for = 'profile_id' class="bmd-label-floating __required">Perfil da Vaga</label>
-          <select name = 'profile_id' id = 'profile_id' class = 'form-control form-control-lg custom-select'>
+          <label for = 'profile' class="bmd-label-floating __required">Perfil da Vaga</label>
+          <select name = 'profile' id = 'profile' class = 'form-control form-control-lg custom-select'>
             <option value = ''></option>
             @foreach($profiles as $p)
               <option value = '{{$p->id}}'>{{$p->profile}}</option>
@@ -42,7 +46,6 @@
     </div>
   </div>
 </div>
-
 
 <div class = 'row' style = 'height:100px;'>
   <div class="col-sm-4 col-xs-12">
@@ -79,7 +82,7 @@
       <div class="col-sm-9 col-xs-9">
         <div class="form-group">
           <label for = 'cboa' class="bmd-label-floating __required">Escolaridade Mínima</label>
-          <select name = 'degree_id' id = 'degree_id' class = 'form-control form-control-lg custom-select pr-0'>
+          <select name = 'degree' id = 'degree' class = 'form-control form-control-lg custom-select pr-0'>
             <option value = ''>&nbsp;</option>
             @foreach($degrees as $d)
               <option value = '{{$d->id}}'>{{$d->degree}}</option>
@@ -90,10 +93,10 @@
       <div class="col-sm-3 col-xs-3">
         <div class="form-group">
           <label for = 'cboa' class="bmd-label-floating __required">Sexo</label>
-          <select name = 'sex' id = 'sex' class = 'form-control form-control-lg custom-select'>
-            <option value = 'I'>&nbsp;</option>
-            <option value = 'M'>M</option>
-            <option value = 'F'>F</option>
+          <select name = 'gender' id = 'gender' class = 'form-control form-control-lg custom-select'>
+            <option value = 'I'>Indiferente</option>
+            <option value = 'M'>Masculino</option>
+            <option value = 'F'>Feminino</option>
           </select>
         </div>
       </div>
@@ -104,7 +107,7 @@
       <div class="col-sm-3 col-xs-12 pl-0">
         <div class="form-group">
           <label for = 'cboa' class="bmd-label-floating __required">Aprendiz</label>
-          <select name = 'sexo' id = 'sexo' class = 'form-control form-control-lg custom-select'>
+          <select name = 'apprentice' id = 'apprentice' class = 'form-control form-control-lg custom-select'>
             <option value = 'S'>Sim</option>
             <option value = 'N' selected>Não</option>
           </select>
@@ -112,23 +115,21 @@
       </div>
       <div class="col-sm-3 col-xs-12 pl-0">
         <div class="form-group">
-          <label for = 'pcd' class="bmd-label-floating __required">PCD</label>
+          <label for = 'pcd' class="bmd-label-floating __required">PcD</label>
           <select name = 'pcd' id = 'pcd' class = 'form-control form-control-lg custom-select'>
-            <option value = 'Não'>Não</option>
+            <option value = ''>Não</option>
             <optgroup label = 'Sim'>
-              <option value = 'Visual'>Visual</option>
-              <option value = 'Auditivo'>Auditivo</option>
-              <option value = 'Físico'>Físico</option>
-              <option value = 'Mental'>Mental</option>
-              <option value = 'Multipla'>Multipla</option>
+              @foreach ($pcdTypes as $pcdType)
+                <option value = '{{ $pcdType->id }}'>{{ $pcdType->title }}</option>
+              @endforeach
             </optgroup>
           </select>
         </div>
       </div>
       <div class="col-sm-6 col-xs-12 pr-0">
         <div class="form-group">
-          <label for = 'pcd' class="bmd-label-floating __required">Valor do salário</label>
-          <select name = 'pcd' id = 'pcd' class = 'form-control form-control-lg custom-select'>
+          <label for = 'salary' class="bmd-label-floating __required">Valor do salário</label>
+          <select name = 'salary' id = 'salary' class = 'form-control form-control-lg custom-select'>
             @foreach($salaries as $s)
               <option value = '{{$s->id}}'>{{$s->salary}}</option>
             @endforeach
@@ -139,16 +140,19 @@
   </div>
 </div>
 
-
 <div class = 'row' style = 'min-height:100px;'>
   <div class="col-12 pl-0">
     <div class="form-group">
       <label for = 'company' class="bmd-label-floating __required mb-3">Selecione as características desejadas para esta vaga</label>
       <div class = 'd-flex justify-content-between flex-wrap' id = 'features'>
-        @foreach($feats as $f)
-          <button type="button" value = '{{$f->id}}' class="btn btn-outline-danger feature" data-toggle="button" aria-pressed="false" autocomplete="off">
-            {{$f->feature}}
-          </button>
+        @foreach($feats as $feat)
+          <div class="features-group" data-profile-id={{ $feat['profile'] }}>
+            @foreach($feat['features'] as $f)
+              <button type="button" value = '{{$f->id}}' class="btn btn-outline-danger feature" data-toggle="button" aria-pressed="false" autocomplete="off">
+                {{$f->feature}}
+              </button>
+            @endforeach
+          </div>
         @endforeach
       </div>
       <input type = 'hidden' name = '__features' id = '__features' value = ''/>
@@ -156,12 +160,11 @@
   </div>
 </div>
 
-
 <div class = 'row' style = 'min-height:100px;'>
   <div class="col-12 px-0">
     <div class="form-group">
       <label for = 'observations' class="bmd-label-floating __required">Especifique outras características/detalhamento necessários para esta vaga</label>
-      <textarea class="form-control form-control-lg" id="observation" name = 'observations' style = 'height:60px'></textarea>
+      <textarea class="form-control form-control-lg" id="observations" name = 'observations' style = 'height:60px'></textarea>
     </div>
   </div>
 </div>

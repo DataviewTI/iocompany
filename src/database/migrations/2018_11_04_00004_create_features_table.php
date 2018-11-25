@@ -8,12 +8,12 @@ class CreateFeaturesTable extends Migration
 {
     public function up()
     {
-			Schema::create('features', function(Blueprint $table){
-				$table->increments('id');
-        $table->char('feature',30)->unique();
-        $table->timestamps();
-        $table->softDeletes();
-			});
+        Schema::create('features', function(Blueprint $table){
+            $table->increments('id');
+            $table->char('feature',30)->unique();
+            $table->timestamps();
+            $table->softDeletes();
+        });
     }
 
     public function down(){

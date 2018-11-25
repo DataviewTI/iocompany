@@ -2,7 +2,21 @@ new IOService({
     name: 'job',
   },
   function(self){
-       //colocad o serviceurl do autocomplete para funcionar instead ajax
+
+      $( "select[name='profile']" ).change(function() {
+        if($( this ).val() != ""){
+          $( '.features-group' ).css('display', 'none');
+          $( '.features-group' ).removeClass('active');
+
+          $( '.features-group[data-profile-id='+$( this ).val()+']' ).css('display', 'block');
+          $( '.features-group[data-profile-id='+$( this ).val()+']' ).addClass('active');
+        } else {
+          $( '.features-group' ).css('display', 'none');
+          $( '.features-group' ).removeClass('active');
+        }
+      });
+
+      //colocar o serviceurl do autocomplete para funcionar instead ajax
 
       console.log('asasa');
 
@@ -10,28 +24,27 @@ new IOService({
         url:"company/simplified-list",
         success: function(ret){
           $("#filterCompany").autocomplete({
-              maxheight:100,
-              minChars:3,
-              preserveInput:true,
-              lookup: $.map(ret, function(item){
-                return { value: item.razaoSocial, data: item.cnpj, nomef:item.nomeFantasia};
-              }),
-              lookupFilter: function (suggestion, query, queryLowerCase) {
-                 return suggestion.value.toLowerCase().indexOf(queryLowerCase) > -1 || suggestion.data.indexOf(queryLowerCase) > -1 || suggestion.nomef.toLowerCase().indexOf(queryLowerCase) > -1;
-              },
-              onSelect:function(sugg,a){
-                  $(this).val(sugg.value); 
-                  $(this).attr('fv-value',sugg.data);
-                  self.fv[0].revalidateField('filterCompany');
-              },
-              onInvalidateSelection(){
-                $(this).attr('fv-value','');
+            maxheight:100,
+            minChars:3,
+            preserveInput:true,
+            lookup: $.map(ret, function(item){
+              return { value: item.razaoSocial, data: item.cnpj, nomef:item.nomeFantasia};
+            }),
+            lookupFilter: function (suggestion, query, queryLowerCase) {
+                return suggestion.value.toLowerCase().indexOf(queryLowerCase) > -1 || suggestion.data.indexOf(queryLowerCase) > -1 || suggestion.nomef.toLowerCase().indexOf(queryLowerCase) > -1;
+            },
+            onSelect:function(sugg,a){
+                $(this).val(sugg.value); 
+                $(this).attr('fv-value',sugg.data);
                 self.fv[0].revalidateField('filterCompany');
-              }
-            });
+            },
+            onInvalidateSelection(){
+              $(this).attr('fv-value','');
+              self.fv[0].revalidateField('filterCompany');
+            }
+          });
         }
       });
-
 
      $("#cbo").autocomplete({
         maxheight:100,
@@ -74,52 +87,97 @@ new IOService({
         self.fv[0].revalidateField('__features')
     });
 
-
-
-    // //Datatables initialization
-    
-    // self.dt = $("#cbo-table").DataTable({
-    //   aaSorting:[ [0,"desc" ]],
-    //   ajax: self.path+'/list',
-    //   initComplete:function(){
-    //     let api = this.api();
-    //     $.fn.dataTable.defaults.initComplete(this);
-    //   },
-    //   footerCallback:function(row, data, start, end, display){
-    //   },
-    //   columns: [
-    //     { data: 'id', name: 'cnpj'},
-    //     { data: 'razaoSocial', name: 'razaoSocial'},
-    //     { data: 'actions', name: 'actions'},
-    //   ],
-    //   columnDefs:
-    //   [
-    //     {targets:'__dt_cnpj',width: "3%",class:"text-center",searchable: true,orderable:true},
-    //     {targets:'__dt_razaosocial',searchable: true,orderable:true},
-    //     {targets:'__dt_nomefantasia',width:"30%",searchable: true,orderable:true},
-    //     {targets:'__dt_acoes',width:"7%",className:"text-center",searchable:false,orderable:false,
-    //       render:function(data,type,row,y){
-    //         return self.dt.addDTButtons({
-    //           buttons:[
-    //             {ico:'ico-eye',_class:'text-primary',title:'preview'},
-    //             {ico:'ico-edit',_class:'text-info',title:'editar'},
-    //             {ico:'ico-trash',_class:'text-danger',title:'excluir'},
-    //         ]});
-    //       }
-    //     }
-    //   ]	
-    // }).on('click',".btn-dt-button[data-original-title=editar]",function(){
-    //   var data = self.dt.row($(this).parents('tr')).data();
-    //   self.view(data.cnpj);
-    // }).on('click','.ico-trash',function(){
-    //   var data = self.dt.row($(this).parents('tr')).data();
-    //   self.delete(data.cnpj);
-    // }).on('click','.ico-eye',function(){
-    //   var data = self.dt.row($(this).parents('tr')).data();
-    //   preview({id:data.cnpj});
-    // }).on('draw.dt',function(){
-    //   $('[data-toggle="tooltip"]').tooltip();
-    // });
+    //Datatables initialization
+    self.dt = $("#jobs-table").DataTable({
+      aaSorting:[[0,"desc" ]],
+      ajax: self.path+'/list',
+      initComplete:function(){
+        let api = this.api();
+        $.fn.dataTable.defaults.initComplete(this);
+      },
+      footerCallback:function(row, data, start, end, display){
+      },
+      columns: [
+        { data: 'id', name: 'id'},
+        { data: 'company', name: 'cnpj'},
+        { data: 'company', name: 'razaoSocial'},
+        { data: 'date_start', name: 'date_start'},
+        { data: 'interval', name: 'interval'},
+        { data: 'date_end', name: 'date_end'},
+        { data: 'degree', name: 'degree'},
+        { data: 'profile', name: 'profile'},
+        { data: 'gender', name: 'gender'},
+        { data: 'apprentice', name: 'apprentice'},
+        { data: 'actions', name: 'actions'},
+      ],
+      columnDefs: [
+        {targets:'__dt_id', width: '1%',searchable:true,orderable:true,},
+        {targets:'__dt_cnpj',width: '5%', class: 'text-center', searchable:true,orderable:true,
+          render:function(data,type,row,y){
+            return data.cnpj
+          }
+        },
+        {targets:'__dt_razao-social',searchable:true,orderable:true,
+          render:function(data,type,row,y){
+            return data.razaoSocial
+          }
+        },
+        {targets:'__dt_dt-inicio', width: '8%', class: 'text-center', searchable:true,orderable:true,},
+        {targets:'__dt_intervalo', width: '5%', class: 'text-center', searchable:true,orderable:true,},
+        {targets:'__dt_dt-final', width: '8%', class: 'text-center', searchable:true,orderable:true,},
+        {targets:'__dt_escolaridade', width: '20%', searchable:true,orderable:true,
+          render:function(data,type,row,y){
+            return data.degree
+          }
+        },
+        {targets:'__dt_perfil', width: '8%', searchable:true,orderable:true,
+          render:function(data,type,row,y){
+            return data.profile
+          }
+        },
+        {targets:'__dt_genero', width: '5%', searchable:true,orderable:true,
+          render:function(data,type,row,y){
+            if(data == 'I'){
+              return 'Indiferente'
+            } else if (data == 'M'){
+              return 'Masculino'
+            } else if (data == 'F'){
+              return 'Feminino'
+            }
+          }
+        },
+        {targets:'__dt_aprendiz', width: '5%', searchable:true,orderable:true,
+          render:function(data,type,row,y){
+            if(data == 'S'){
+              return 'Sim'
+            } else if (data == 'N'){
+              return 'Não'
+            }
+          }
+        },
+        {targets:'__dt_acoes',width:"7%",className:"text-center",searchable:false,orderable:false,
+          render:function(data,type,row,y){
+            return self.dt.addDTButtons({
+              buttons:[
+                {ico:'ico-eye',_class:'text-primary',title:'preview'},
+                {ico:'ico-edit',_class:'text-info',title:'editar'},
+                {ico:'ico-trash',_class:'text-danger',title:'excluir'},
+            ]});
+          }
+        }
+      ]	
+    }).on('click',".btn-dt-button[data-original-title=editar]",function(){
+      var data = self.dt.row($(this).parents('tr')).data();
+      self.view(data.id);
+    }).on('click','.ico-trash',function(){
+      var data = self.dt.row($(this).parents('tr')).data();
+      self.delete(data.id);
+    }).on('click','.ico-eye',function(){
+      var data = self.dt.row($(this).parents('tr')).data();
+      preview({id:data.cnpj});
+    }).on('draw.dt',function(){
+      $('[data-toggle="tooltip"]').tooltip();
+    });
 
 
       self.fv = [];
@@ -148,7 +206,7 @@ new IOService({
                 }
               }
             },
-            'profile_id':{
+            'profile':{
               validators:{
                 notEmpty: {
                   message: 'Informe o perfil!'
@@ -218,7 +276,7 @@ new IOService({
                 }
               }
             },
-            'degree_id':{
+            'degree':{
               validators:{
                 notEmpty: {
                   message: 'Informe a escolaridade'
@@ -266,6 +324,8 @@ new IOService({
     })    
       
     self.wizardActions(function(){ 
+      var feats = checkFeatures();
+      $('#__features').val(feats);
     });    
 
     self.callbacks.view = view(self);
@@ -277,6 +337,9 @@ new IOService({
 
     self.callbacks.unload = self=>{
       $('#xxx').val('');
+      $( '.features-group' ).css('display', 'none');
+      $( '.features-group' ).removeClass('active');
+
     }    
 
     self.tabs.cadastrar.tab.on('show.bs.tab',()=>{
@@ -287,42 +350,58 @@ new IOService({
 
 function view(self){
   return{
-      onSuccess:function(data){
-        
-        data.id = data.cnpj;
+    onSuccess:function(data){
+      console.log(data);
+      
+      $('#filterCompany').val(data.company.razaoSocial);
 
-        $('#cnpj').val(data.cnpj);
-        document.getElementById('cnpj').setAttribute('disabled','true');
+      //self.fv[0].revalidateField('cnpj');
+      $('#profile').val(data.profile.id);
+      $( '.features-group' ).css('display', 'none');
+      $( '.features-group' ).removeClass('active');
+      $( '.features-group[data-profile-id='+data.profile.id+']' ).css('display', 'block');
+      $( '.features-group[data-profile-id='+data.profile.id+']' ).addClass('active');
 
-        //self.fv[0].revalidateField('cnpj');
-        $('#razaoSocial').val(data.razaoSocial);
-        $('#nomeFantasia').val(data.nomeFantasia);
-        $('#phone').val(data.phone);
-        $('#mobile').val(data.mobile);
-        $('#email').val(data.email);
-        $('#zipCode').val(data.zipCode);
-        $('#numberApto').val(data.numberApto);
+      data.features.forEach(function (item) {
+        $( '.features-group[data-profile-id='+data.profile.id+'] .feature[value='+item.id+']' ).addClass('active');
+        $( '.features-group[data-profile-id='+data.profile.id+'] .feature[value='+item.id+']' ).addClass('focus');
+        console.log(item);
+      })
 
-        self.fv[0].validate();
+      $('#cbo').val(data.cbo_occupation.occupation);
+      $("#date_start").pickadate('picker').set('select',new Date(data.date_start));
+      $('#interval').val(data.interval);
+      $("#date_end").pickadate('picker').set('select',new Date(data.date_end));
+      $('#degree').val(data.degree.id);
+      $('#gender').val(data.gender);
+      $('#apprentice').val(data.apprentice);
 
-        //não disparar o preenchimento quando for update logo após o view
-      }, //sasas
-      onError:function(self){
-        console.error(self);
+      if(data.pcd_type != null){
+        $('#pcd').val(data.pcd_type.id);
       }
+
+      $('#salary').val(data.salary.id);
+      $('#observations').val(data.observations);
+
+      self.fv[0].validate();
+
+      //não disparar o preenchimento quando for update logo após o view
+    }, //sasas
+    onError:function(self){
+      console.error(self);
     }
+  }
 }
 
 
 function checkFeatures(){
   let feats = [];
-  $('#features .feature.active').each((i,obj)=>{
+  $('#features .features-group.active .feature.active').each((i,obj)=>{
     feats.push(obj.getAttribute('value'));
   })
 
   return feats;
 }
-
 
 
 function setCEP(data,self){

@@ -7,10 +7,18 @@
 		</div>
   </div>
 	@component('IntranetOne::io.components.datatable',[
-	"_id" => "cbo-table",
+	"_id" => "jobs-table",
 	"_columns"=> [
-			["title" => "Código"],
-			["title" => "Descrição CBO"],
+			["title" => "Id"],
+			["title" => "CNPJ"],
+			["title" => "Razão Social"],
+			["title" => "Dt Início"],
+			["title" => "Intervalo"],
+			["title" => "Dt Final"],
+			["title" => "Escolaridade"],
+			["title" => "Perfil"],
+			["title" => "Gênero"],
+			["title" => "Aprendiz"],
 			["title" => "Ações"],
 		]
 	])

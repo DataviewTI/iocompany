@@ -73,12 +73,12 @@ class CreateCBOTable extends Migration
     }
 
     public function down(){
+        Schema::dropIfExists('cbo_occupational_profiles');
+        Schema::dropIfExists('cbo_synonym');
+        Schema::dropIfExists('cbo_occupations');
         Schema::dropIfExists('cbo_big_groups');
         Schema::dropIfExists('cbo_main_subgroups');
         Schema::dropIfExists('cbo_subgroups');
         Schema::dropIfExists('cbo_families');
-        Schema::dropIfExists('cbo_occupations');
-        Schema::dropIfExists('cbo_occupational_profiles');
-        Schema::dropIfExists('cbo_synonym');
     }
 }
