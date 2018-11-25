@@ -33,7 +33,7 @@ class CompanyController extends IOController{
     return json_encode($query);
   }
   
-  	public function list(){
+  public function list(){
     $query = Company::select('cnpj','razaoSocial','nomeFantasia')
     ->with([
       'group'=>function($query){
