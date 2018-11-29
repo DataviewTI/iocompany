@@ -13,7 +13,7 @@ class Graduation extends Model
     return $this->belongsTo('Dataview\IOCompany\Candidate');
   }
 
-  public function type()
+  public function graduationType()
   {
     return $this->belongsTo('Dataview\IOCompany\GraduationType');
   }

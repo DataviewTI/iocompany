@@ -19,7 +19,7 @@ class Candidate extends Model
     'address_number',
     'address_district',
     'address_city',
-    'address_uf',
+    'address_state',
     'phone',
     'mobile',
     'email',
@@ -33,7 +33,7 @@ class Candidate extends Model
 
   public function maritalStatus()
   {
-    return $this->belongsTo('Dataview\IOCompany\MaritalStatus', 'marital_status_id');
+    return $this->belongsTo('Dataview\IOCompany\MaritalStatusType', 'marital_status_type_id');
   }
 
   public function degree()
@@ -53,7 +53,7 @@ class Candidate extends Model
 
   public function childrenAmount()
   {
-    return $this->belongsTo('Dataview\IOCompany\ChildrenAmount', 'childrenAmount_id');
+    return $this->belongsTo('Dataview\IOCompany\ChildrenAmount', 'children_amount_id');
   }
 
   public function salary()

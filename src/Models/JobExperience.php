@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class JobExperience extends Model
 {
-  protected $fillable = ['title'];
+  protected $fillable = ['type', 'company', 'role'];
 
   public function candidate()
   {

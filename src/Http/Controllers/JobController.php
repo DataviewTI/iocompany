@@ -92,7 +92,6 @@ class JobController extends IOController{
 	}
 
   public function view($id){
-
     $check = $this->__view();
     if(!$check['status'])
       return response()->json(['errors' => $check['errors'] ], $check['code']);	

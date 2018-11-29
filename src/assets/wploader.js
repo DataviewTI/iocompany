@@ -20,9 +20,10 @@ function IOCompany(params={}){
 
     mix.styles([
       IO.src.io.root+'custom/custom-devbridge.css',
-      $.dep.service + 'company.css',
+      IO.src.io.vendors + 'aanjulena-bs-toggle-switch/aanjulena-bs-toggle-switch.css',
       IO.dep.io.toastr + 'toastr.min.css',
       IO.src.io.css + 'toastr.css',
+      $.dep.service + 'company.css',
     ], IO.dest.io.root + 'services/io-company.min.css');
     
     mix.babel([

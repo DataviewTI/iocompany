@@ -56,7 +56,7 @@
       </div>
       <div class="col-sm-8 col-xs-12">
         <div class="form-group">
-          <label for = 'address' class="bmd-label-floating __required">Logradrouro</label>
+          <label for = 'address' class="bmd-label-floating __required">Logradouro</label>
           <input name = 'address' type = 'text' id = 'address' class = 'form-control form-control-lg' />
         </div>
       </div>

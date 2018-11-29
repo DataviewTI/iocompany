@@ -18,6 +18,7 @@ class CreateMaritalStatusTypesTable extends Migration
             $table->text('title');
             $table->tinyInteger('order')->unsigned()->default(0);        
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

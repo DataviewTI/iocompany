@@ -9,8 +9,12 @@ class CandidateRequest extends IORequest
   public function sanitize(){
     $input = parent::sanitize();
 
-    $input['cnpj'] =  preg_replace("/[^0-9]/", "",$input['cnpj']);
-    $input['city_id'] =  $input['__city'];
+    $input['birthday'] = $input['birthday_submit'];
+    $input['cpf'] = str_replace(".", "", $input['cpf']);
+    $input['cpf'] = str_replace("-", "", $input['cpf']);
+    
+    $input['address_city'] = $input['__city'];
+    $input['address_state'] = $input['__state'];
 
     $this->replace($input);
 	}

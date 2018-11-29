@@ -21,9 +21,9 @@ class CreateJobExperiencesTable extends Migration
             $table->enum('type', ['J', 'V'])->default('V');
             $table->text('company');
             $table->text('role');
-            $table->foreign('candidate_id')->references('id')->on('candidates');
-            $table->foreign('job_duration_id')->references('id')->on('job_durations');
-            $table->foreign('resignation_reason_id')->references('id')->on('resignation_reasons')->nullable();
+            $table->foreign('candidate_id')->references('id')->on('candidates')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreign('job_duration_id')->references('id')->on('job_durations')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreign('resignation_reason_id')->references('id')->on('resignation_reasons')->nullable()->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });
     }

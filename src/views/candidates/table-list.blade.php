@@ -16,7 +16,6 @@
 			["title" => "Cpf"],
 			["title" => "Aprendiz"],
 			["title" => "PcD"],
-			["title" => "Cidade"],
 			["title" => "Ações"],
 		]
 	])

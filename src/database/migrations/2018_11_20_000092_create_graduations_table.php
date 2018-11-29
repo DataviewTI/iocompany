@@ -20,10 +20,11 @@ class CreateGraduationsTable extends Migration
             $table->text('institution');
             $table->text('school');
             $table->year('ending');
-            $table->tinyInteger('order')->unsigned();        
+            $table->tinyInteger('order')->unsigned()->default(0);        
             $table->timestamps();
-            $table->foreign('candidate_id')->references('id')->on('candidates');
-            $table->foreign('graduation_type_id')->references('id')->on('graduation_types');
+            $table->foreign('candidate_id')->references('id')->on('candidates')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreign('graduation_type_id')->references('id')->on('graduation_types')->onDelete('cascade')->onUpdate('cascade');
+            $table->softDeletes();
         });
     }
 
