@@ -17,7 +17,7 @@ class ServiceSeeder extends Seeder
         Service::insert([
             'service' => $serv,
             'alias' =>str_slug($serv),
-            'ico' => 'ico-save',
+            'ico' => 'ico-building',
             'description' => "Company forms",
             'order' => Service::max('order')+1
           ]);
@@ -27,7 +27,7 @@ class ServiceSeeder extends Seeder
         Service::insert([
             'service' => 'Job',
             'alias' =>'job',
-            'ico' => 'ico-idea',
+            'ico' => 'ico-portfolio',
             'description' => "Jobs vacancies for Companies",
             'order' => Service::max('order')+1
           ]);
