@@ -173,7 +173,7 @@
             ["title" => "Cargo"],
             ["title" => "Empresa"],
             ["title" => "Duração"],
-            ["title" => "job type id"],
+            ["title" => "job type"],
             ["title" => "job duration id"],
             ["title" => "resignation reason id"],
             ["title" => "Ações"],

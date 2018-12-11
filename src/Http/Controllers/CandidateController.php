@@ -13,6 +13,7 @@ use Dataview\IOCompany\Candidate;
 use Dataview\IOCompany\Graduation;
 use Dataview\IOCompany\GraduationType;
 use Dataview\IOCompany\Job;
+use Dataview\IOCompany\ResignationReason;
 use Dataview\IOCompany\JobDuration;
 use Dataview\IOCompany\MaritalStatusType;
 use Validator;
@@ -68,11 +69,13 @@ class CandidateController extends IOController{
   
       foreach ($jobs as $job) {
         $j = new JobExperience([
-          'type' => $job->job_type_id,
+          'type' => $job->job_type,
           'company' => $job->company,
           'role' => $job->role,
         ]);
         $j->jobDuration()->associate(JobDuration::where('id', $job->job_duration_id)->first());
+        if($job->job_type == 'J')
+          $j->resignationReason()->associate(ResignationReason::where('id', $job->resignation_reason_id)->first());
         $obj->jobExperiences()->save($j);
       }
     }
@@ -120,7 +123,7 @@ class CandidateController extends IOController{
       $query->with('graduationType');
     }])
     ->with([ 'jobExperiences' => function ($query) {
-      $query->with('jobDuration');
+      $query->with(['jobDuration', 'resignationReason']);
     }])
     ->get();
 				
@@ -128,6 +131,63 @@ class CandidateController extends IOController{
 	}
 	
 	public function update($id,CandidateRequest $request){
+    $check = $this->__update($request);
+    if(!$check['status'])
+      return response()->json(['errors' => $check['errors']], $check['code']);	
+
+    $_old = Candidate::find($id);
+    $_old->update([
+      'name' => $request->name,
+      'social_name' => $request->social_name,
+      'birthday' => $request->birthday,
+      'gender' => $request->gender,
+      'cpf' => $request->cpf,
+      'rg' => $request->rg,
+      'cnh' => $request->cnh,
+      'apprentice' => $request->apprentice,
+      'phone' => $request->phone,
+      'mobile' => $request->mobile,
+      'email' => $request->email,
+      'zipCode' => $request->zipCode,
+      'address_street' => $request->address_street,
+      'address_number' => $request->address_number,
+      'address_district' => $request->address_district,
+      'address_city' => $request->address_city,
+      'address_state' => $request->address_state,
+    ]);
+
+    $_old->maritalStatus()->dissociate();
+    $_old->maritalStatus()->associate(
+      MaritalStatusType::where('id',$request->marital_status)->first()
+    );
+
+    $_old->childrenAmount()->dissociate();
+    $_old->childrenAmount()->associate(
+      ChildrenAmount::where('id',$request->children_amount)->first()
+    );
+
+    $_old->degree()->dissociate();
+    $_old->degree()->associate(
+      Degree::find($request->degree)
+    );
+
+    $_old->salary()->dissociate();
+    $_old->salary()->associate(
+      Salary::find($request->salary)
+    );
+    
+    $_old->manageGraduations(json_decode($request->__graduations));
+    $_old->manageJobExperiences(json_decode($request->__jobs));
+
+    if($request->pcd != "" && $request->pcd != null){
+      $_old->pcdType()->associate(
+        PcdType::find($request->pcd)
+      );
+    } else {
+      $_old->pcd_type_id = null;
+    }
+    
+    return response()->json(['success'=>$_old->save()]);
 	}
 
   public function delete($id){

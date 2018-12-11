@@ -2,13 +2,12 @@ new IOService({
     name: 'candidate',
   },
   function(self){
+    $('#cpf').mask('###.###.###-##');
+
     $('#zipCode').mask('00000-000');
 
     $('#birthday').pickadate({
       formatSubmit: 'yyyy-mm-dd 00:00:00',
-      onClose:function(){
-        //$("[name='date_end']").focus();
-      }
     }).pickadate('picker').on('set', function(t){
       self.fv[0].revalidateField('birthday');
     });
@@ -31,7 +30,7 @@ new IOService({
           addGraduation(
           {
             self:self,
-            graduation_id: $('#graduation_type').val(),
+            graduation_id: $('#graduation_id').val(),
             graduation_type_id:$('#graduation_type').val(),
             graduation_type_title:$('#graduation_type option:selected').text(),
             institution:$('#institution').val(),
@@ -50,7 +49,8 @@ new IOService({
           addJob(
           {
             self:self,
-            job_type_id:$('#job_type').val(),
+            job_id: $('#job_id').val(),
+            job_type:$('#job_type').val(),
             job_type_title:$('#job_type option:selected').text(),
             job_duration_id:$('#job_duration').val(),
             job_duration_title:$('#job_duration option:selected').text(),
@@ -93,7 +93,7 @@ new IOService({
     
     $('#job_type').change(function() {
 
-      if( $( this ).val() == "P" ){
+      if( $( this ).val() == "J" ){
         $("#jobs_form select#resignation_reason, #jobs_form label[for=resignation_reason]").each(function( index ) {
           $(this).css("opacity", "1");
           $(this).removeAttr('disabled');
@@ -216,6 +216,10 @@ new IOService({
               notEmpty: {
                 enabled: true,
                 message: 'Informe o CPF!'
+              },
+              id:{
+                country:'BR',
+                message: 'CPF inválido',
               }
             }
           },
@@ -357,15 +361,21 @@ new IOService({
                           }
                         })
                       else{
+                        delete $.ajaxSettings.headers["X-CSRF-Token"];
+                        console.log('teste');
+                          
                         $.ajax({
-                          headers: {
-                              'Content-Type':'application/json',
-                              'X-CSRF-Token': laravel_token,
-                          },
                           url:`https://viacep.com.br/ws/${$('#zipCode').cleanVal()}/json`,
+                          headers: {
+                            'Content-Type':'application/json',
+                              // 'X-CSRF-Token': laravel_token,
+                          },
+                          complete: (jqXHR) => {
+                            $.ajaxSettings.headers["X-CSRF-Token"] = laravel_token;
+                          },
                           success:(data)=>{
                             if(data.erro==true){
-                              resolve({  
+                              resolve({
                                 valid: false,
                                 message:'Cep não encontrado!',
                                 meta:{
@@ -373,7 +383,7 @@ new IOService({
                                 }
                               });
                             }
-                            else
+                            else{
                               resolve({
                                 valid:true,
                                 meta:{
@@ -381,8 +391,12 @@ new IOService({
                                 }
                               });
                             }
-                          });
-                        }
+                          },
+                          error: (data)=>{
+                            console.log('erro');
+                          }
+                        });
+                      }
                     });
                 }
               }
@@ -431,40 +445,6 @@ new IOService({
         },
     }).setLocale('pt_BR', FormValidation.locales.pt_BR);
 
-    // let fv1 = FormValidation.formValidation(
-    //   form.querySelector('.step-pane[data-step="2"]'),
-    //   {
-    //     fields: {
-    //     },
-    //     plugins:{
-    //       trigger: new FormValidation.plugins.Trigger(),
-    //       submitButton: new FormValidation.plugins.SubmitButton(),
-    //       bootstrap: new FormValidation.plugins.Bootstrap(),
-    //       icon: new FormValidation.plugins.Icon({
-    //         valid: 'fv-ico ico-check',
-    //         invalid: 'fv-ico ico-close',
-    //         validating: 'fv-ico ico-gear ico-spin'
-    //       }),
-    //     },
-    // }).setLocale('pt_BR', FormValidation.locales.pt_BR);
-
-    // let fv2 = FormValidation.formValidation(
-    //   form.querySelector('.step-pane[data-step="2"]'),
-    //   {
-    //     fields: {
-    //     },
-    //     plugins:{
-    //       trigger: new FormValidation.plugins.Trigger(),
-    //       submitButton: new FormValidation.plugins.SubmitButton(),
-    //       bootstrap: new FormValidation.plugins.Bootstrap(),
-    //       icon: new FormValidation.plugins.Icon({
-    //         valid: 'fv-ico ico-check',
-    //         invalid: 'fv-ico ico-close',
-    //         validating: 'fv-ico ico-gear ico-spin'
-    //       }),
-    //     },
-    // }).setLocale('pt_BR', FormValidation.locales.pt_BR);
-
     self.fv = [fv1, fv2];
     
     self.graduations_dt = $('#__graduations_dt').DataTable({
@@ -488,16 +468,15 @@ new IOService({
       ]
     })
     .on('click','.ico-trash',function(){
-      self.dimensions_dt.row($(this).parents('tr')).remove().draw();
+      self.graduations_dt.row($(this).parents('tr')).remove().draw();
     })
     .on('click','.ico-edit',function(){
-      var data = self.dimensions_dt.row($(this).parents('tr')).data();
-      $('#add_dimension').addClass('d-none');
-      $('#img_prefix').val(data[0]).attr('disabled','disabled');
-      $('#thumb_edit').removeClass('d-none');
-      $('#cancel_thumb_edit').removeClass('d-none');
-      $('#img_altura').val(data[2]);
-      $('#img_largura').val(data[1]).focus();
+      var data = self.graduations_dt.row($(this).parents('tr')).data();
+      $('#graduation_id').val(data[0]);
+      $('#graduation_type').val(data[1]);
+      $('#institution').val(data[3]);
+      $('#school').val(data[4]);
+      $('#ending').val(data[5]);
     });
 
     self.graduationsFv = FormValidation.formValidation(
@@ -530,20 +509,25 @@ new IOService({
           },   
           ending: {
             validators:{
-                digits:{
-                  enabled: true,
-                  message: 'Informe apenas números!'
-                },
-                stringLength:{
-                  enabled: true,
-                  min: 4,
-                  max: 4,
-                  message: 'Informe um ano válido!'
-                },
-                notEmpty:{
-                  enabled: true,
-                  message: 'Informe a data de conclusão!'
-                }
+              digits:{
+                enabled: true,
+                message: 'Informe apenas números!'
+              },
+              stringLength:{
+                enabled: true,
+                min: 4,
+                max: 4,
+                message: 'Informe um ano válido!'
+              },
+              between: {
+                min: 1901,
+                max: 2155,
+                message: 'Informe um ano válido!',
+              },
+              notEmpty:{
+                enabled: true,
+                message: 'Informe a data de conclusão! '
+              }
             }
           },          
         },
@@ -568,7 +552,7 @@ new IOService({
       },
       columnDefs:[
         {targets:'__dt_id',visible: false,},
-        {targets:'__dt_job-type-id',visible: false,},
+        {targets:'__dt_job-type',visible: false,},
         {targets:'__dt_job-duration-id',visible: false,},
         {targets:'__dt_resignation-reason-id',visible: false,},
         {targets:'__dt_acoes',width:"10%",className:"text-center",searchable:false,
@@ -583,16 +567,18 @@ new IOService({
       ]
     })
     .on('click','.ico-trash',function(){
-      self.dimensions_dt.row($(this).parents('tr')).remove().draw();
+      self.jobs_dt.row($(this).parents('tr')).remove().draw();
     })
     .on('click','.ico-edit',function(){
-      var data = self.dimensions_dt.row($(this).parents('tr')).data();
-      $('#add_dimension').addClass('d-none');
-      $('#img_prefix').val(data[0]).attr('disabled','disabled');
-      $('#thumb_edit').removeClass('d-none');
-      $('#cancel_thumb_edit').removeClass('d-none');
-      $('#img_altura').val(data[2]);
-      $('#img_largura').val(data[1]).focus();
+      var data = self.jobs_dt.row($(this).parents('tr')).data();
+      $('#job_id').val(data[0]);
+      $('#role').val(data[2]);
+      $('#company').val(data[3]);
+      $('#job_type').val(data[5]);
+      $('#job_type').change();
+      $('#job_duration').val(data[6]);
+      $('#resignation_reason').val(data[7]);
+
     });
 
     self.jobsFv = FormValidation.formValidation(
@@ -668,7 +654,18 @@ new IOService({
     }
 
     self.callbacks.unload = self=>{
-      $('#xxx').val('');
+      $('#graduation_id').val('');
+      $('#graduation_type').val('');
+      $('#institution').val('');
+      $('#school').val('');
+      $('#ending').val('');
+
+      $('#job_id').val('');
+      $('#job_type').val('');
+      $('#job_duration').val('');
+      $('#resignation_reason').val('');
+      $('#company').val('');
+      $('#role').val('');
     }    
 
     self.tabs.cadastrar.tab.on('show.bs.tab',()=>{
@@ -676,17 +673,41 @@ new IOService({
 });
 
 function addGraduation(p){
-  p.self.graduations_dt.row.add([
-      p.graduation_id == '' ? null : p.graduation_id,
+  if(p.graduation_id == ''){
+    p.self.graduations_dt.row.add([
+      null,
       p.graduation_type_id,
       p.graduation_type_title,
       p.institution,
       p.school,
       p.ending,
       null
-    ],
-  ).draw(true);
+    ]).draw(true);
+  } else {
+    var data = [
+      p.graduation_id,
+      p.graduation_type_id,
+      p.graduation_type_title,
+      p.institution,
+      p.school,
+      p.ending,
+      null
+    ];
+    // check if there's any row in the table with the same graduation_id
+    var row = null;
+    p.self.graduations_dt.rows().data().toArray().forEach((element, index, array) => {
+      if(element[0] == p.graduation_id)
+        row = p.self.graduations_dt.row(index);
+    })
+    
+    if(row != null) {
+      row.data(data).draw(true);
+    } else {
+      p.self.graduations_dt.row.add(data).draw(true);
+    }
+  }
   
+  $('#graduation_id').val('');
   $('#graduation_type').val('');
   $('#institution').val('');
   $('#school').val('');
@@ -708,36 +729,64 @@ function getGraduations(dt){
       school: row[4],
       ending: row[5],
     })
-  } );
+  });
 
   return graduations;
 }
 
 function addJob(p){
-  p.self.jobs_dt.row.add([
-      p.job_id == '' ? null : p.job_id,
+  if(p.job_id == ''){
+    p.self.jobs_dt.row.add([
+      null,
       p.job_type_title,
       p.role,
       p.company,
       p.job_duration_title,
 
-      p.job_type_id,
+      p.job_type,
       p.job_duration_id,
       p.resignation_reason_id,
       null
-    ],
-  ).draw(true);
-  
+    ]).draw(true);
+  } else {
+    var data = [
+      p.job_id,
+      p.job_type_title,
+      p.role,
+      p.company,
+      p.job_duration_title,
+
+      p.job_type,
+      p.job_duration_id,
+      p.resignation_reason_id,
+      null
+    ];
+    // check if there's any row in the table with the same job_id
+    var row = null;
+    p.self.jobs_dt.rows().data().toArray().forEach((element, index, array) => {
+      if(element[0] == p.job_id)
+        row = p.self.jobs_dt.row(index);
+    })
+    
+    if(row != null) {
+      row.data(data).draw(true);
+    } else {
+      p.self.jobs_dt.row.add(data).draw(true);
+    }
+    
+  }
+
+  $('#job_id').val('');
   $('#job_type').val('');
   $('#job_duration').val('');
   $('#resignation_reason').val('');
   $('#company').val('');
   $('#role').val('');
-  p.self.graduationsFv.updateFieldStatus('job_type', 'NotValidated');
-  p.self.graduationsFv.updateFieldStatus('job_duration', 'NotValidated');
-  p.self.graduationsFv.updateFieldStatus('resignation_reason', 'NotValidated');
-  p.self.graduationsFv.updateFieldStatus('company', 'NotValidated');
-  p.self.graduationsFv.updateFieldStatus('role', 'NotValidated');
+  p.self.jobsFv.updateFieldStatus('job_type', 'NotValidated');
+  p.self.jobsFv.updateFieldStatus('job_duration', 'NotValidated');
+  p.self.jobsFv.updateFieldStatus('resignation_reason', 'NotValidated');
+  p.self.jobsFv.updateFieldStatus('company', 'NotValidated');
+  p.self.jobsFv.updateFieldStatus('role', 'NotValidated');
 }
 
 function getJobs(dt){
@@ -750,7 +799,7 @@ function getJobs(dt){
       role: row[2],
       company: row[3],
       job_duration_title: row[4],
-      job_type_id: row[5],
+      job_type: row[5],
       job_duration_id: row[6],
       resignation_reason_id: row[7],
     })
@@ -793,9 +842,25 @@ function view(self){
 
         $('#children_amount').val(data.children_amount.id);
         $('#degree').val(data.degree.id);
+        $('#degree').change();
         $('#salary').val(data.salary.id);
         $('#marital_status').val(data.marital_status.id);
         $("#birthday").pickadate('picker').set('select',new Date(data.birthday));
+
+        data.job_experiences.forEach((item) => {
+          addJob({
+            self:self,
+            job_id: item.id,
+            job_type_title: item.type == 'J' ? 'Profissional' : 'Voluntario',
+            role: item.role,
+            company: item.company,
+            job_duration_title: item.job_duration.title,
+
+            job_type: item.type,
+            job_duration_id: item.job_duration.id,
+            resignation_reason_id: item.resignation_reason_id != null ? item.resignation_reason.id : null,
+          })
+        })
 
         data.graduations.forEach((item) => {
           addGraduation({
@@ -809,16 +874,12 @@ function view(self){
           })
         })
 
-        // self.fv[0].validate();
-
-        //não disparar o preenchimento quando for update logo após o view
-      }, //sasas
+      }, 
       onError:function(self){
         console.error(self);
       }
     }
 }
-
 
 function checkFeatures(){
   let feats = [];
@@ -873,16 +934,4 @@ function setCEP(data,self){
   self.fv[0].revalidateField('address_city');
   self.fv[0].revalidateField('address_number'); 
   self.fv[0].revalidateField('address_state'); 
-}
-
-function calcFinalDate(){
-  const ini = $('#date_start').pickadate('picker');
-  const end = $('#date_end').pickadate('picker');
-
-  end.set('clear');
-
-  if(ini.get('select')!==null){
-    const new_date = moment(ini.get('select','yyyy-mm-dd')).add($('#interval').val(),'days');
-    end.set('select',new_date.format('YYYY-MM-DD'),{format: 'yyyy-mm-dd'});
-  }
 }

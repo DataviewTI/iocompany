@@ -59,6 +59,8 @@ function IOCompany(params={}){
     ], IO.dest.io.root + 'services/io-jobs.min.js');
 
     mix.js([
+      IO.dep.jquery_mask+'jquery.mask.min.js',
+      IO.src.js + 'extensions/ext-jquery.mask.js',
       $.dep.moment + 'moment.js',
       $.dep.service+'candidate.js',
     ], IO.dest.io.root + 'services/io-candidates.min.js');

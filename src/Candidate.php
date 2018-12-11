@@ -3,6 +3,11 @@
 namespace Dataview\IOCompany;
 
 use Illuminate\Database\Eloquent\Model;
+use Dataview\IOCompany\Graduation;
+use Dataview\IOCompany\GraduationType;
+use Dataview\IOCompany\JobExperience;
+use Dataview\IOCompany\JobDuration;
+use Dataview\IOCompany\ResignationReason;
 
 class Candidate extends Model
 {
@@ -65,5 +70,86 @@ class Candidate extends Model
   {
     return $this->belongsTo('Dataview\IOCompany\Group');
   }
+
+  public function manageGraduations($graduations)
+  {
+    dump($graduations);
+
+    $_graduations = [];
+    
+		foreach($graduations as $graduation)
+		{
+      $graduation  = (object) $graduation;
+
+      if($graduation->id == null){
+				$_graduation = new Graduation([
+          'institution' => $graduation->institution,
+          'ending' => $graduation->ending,
+          'school' => $graduation->school,
+        ]);
+        $_graduation->graduationType()->associate(GraduationType::where('id', $graduation->graduation_type_id)->first());
+
+				$this->graduations()->save($_graduation);
+				array_push($_graduations,$_graduation->id);
+			} else {
+				$__upd = Graduation::find($graduation->id);//->id)->get();
+				$__upd->update([
+          'institution' => $graduation->institution,
+          'ending' => $graduation->ending,
+          'school' => $graduation->school,
+        ]);	
+        $__upd->graduationType()->dissociate();
+        $__upd->graduationType()->associate(GraduationType::where('id', $graduation->graduation_type_id)->first());
+        
+        array_push($_graduations,$graduation->id);
+			}
+    }
+    
+		$to_remove = array_diff(array_column($this->graduations()->get()->toArray(),'id'),$_graduations);
+		Graduation::destroy($to_remove);
+	}
+
+  public function manageJobExperiences($jobs)
+  {
+    $_jobs = [];
+    
+		foreach($jobs as $job)
+		{
+      $job  = (object) $job;
+      dump($job);
+
+      if($job->id == null){
+				$_job = new JobExperience([
+          'type' => $job->job_type,
+          'company' => $job->company,
+          'role' => $job->role,
+        ]);
+        $_job->jobDuration()->associate(JobDuration::where('id', $job->job_duration_id)->first());
+        if($job->job_type == 'J')
+          $_job->resignationReason()->associate(ResignationReason::where('id', $job->resignation_reason_id)->first());
+
+				$this->jobExperiences()->save($_job);
+				array_push($_jobs,$_job->id);
+			} else {
+				$__upd = JobExperience::find($job->id);//->id)->get();
+				$__upd->update([
+          'type' => $job->job_type,
+          'company' => $job->company,
+          'role' => $job->role,
+        ]);	
+        $__upd->jobDuration()->dissociate();
+        $__upd->resignationReason()->dissociate();
+
+        $__upd->jobDuration()->associate(JobDuration::where('id', $job->job_duration_id)->first());
+        if($job->job_type == 'J')
+          $__upd->resignationReason()->associate(ResignationReason::where('id', $job->resignation_reason_id)->first());
+
+        array_push($_jobs,$job->id);
+			}
+    }
+    
+		$to_remove = array_diff(array_column($this->jobExperiences()->get()->toArray(),'id'),$_jobs);
+		JobExperience::destroy($to_remove);
+	}
 
 }
