@@ -29,6 +29,8 @@ class Candidate extends Model
     'mobile',
     'email',
     'apprentice',
+    'last_login',
+    'remember_token',
   ];
 
   public function graduations()
@@ -73,8 +75,6 @@ class Candidate extends Model
 
   public function manageGraduations($graduations)
   {
-    dump($graduations);
-
     $_graduations = [];
     
 		foreach($graduations as $graduation)
@@ -116,8 +116,6 @@ class Candidate extends Model
 		foreach($jobs as $job)
 		{
       $job  = (object) $job;
-      dump($job);
-
       if($job->id == null){
 				$_job = new JobExperience([
           'type' => $job->job_type,

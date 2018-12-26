@@ -11,7 +11,26 @@ class Company extends IOModel
   protected  $primaryKey = 'cnpj';
   public $incrementing = false;
 
-  protected $fillable = ['cnpj','razaoSocial','nomeFantasia','phone1','phone','mobile','mobile2','email','zipCode','address','address2','numberApto','city_id','group_id','description','data'];
+  protected $fillable = [
+    'cnpj',
+    'razaoSocial',
+    'nomeFantasia',
+    'phone1',
+    'phone',
+    'mobile',
+    'mobile2',
+    'email',
+    'zipCode',
+    'address',
+    'address2',
+    'numberApto',
+    'city_id',
+    'group_id',
+    'description',
+    'data',
+    'last_login',
+    'remember_token',
+  ];
 
   protected $appends = [
     'group' => false,
