@@ -29,6 +29,9 @@ class Candidate extends Model
     'mobile',
     'email',
     'apprentice',
+    'password',
+    'last_login',
+    'remember_token',
   ];
 
   public function graduations()

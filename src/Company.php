@@ -28,6 +28,7 @@ class Company extends IOModel
     'group_id',
     'description',
     'data',
+    'password',
     'last_login',
     'remember_token',
   ];
