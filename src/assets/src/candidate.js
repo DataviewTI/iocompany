@@ -1,20 +1,20 @@
 new IOService({
     name: 'candidate',
   },
-  function(self){
+  function (self) {
     $('#cpf').mask('###.###.###-##');
 
     $('#zipCode').mask('00000-000');
 
     $('#birthday').pickadate({
       formatSubmit: 'yyyy-mm-dd 00:00:00',
-    }).pickadate('picker').on('set', function(t){
+    }).pickadate('picker').on('set', function (t) {
       self.fv[0].revalidateField('birthday');
     });
 
     $('#other_gender').attr('disabled', true);
-    $('input[name=gender]').change(function() {
-      if( $( this ).val() == "Outros"){
+    $('input[name=gender]').change(function () {
+      if ($(this).val() == "Outros") {
         $('#other_gender').removeAttr('disabled');
         self.fv[0].enableValidator('other_gender', 'notEmpty');
       } else {
@@ -23,406 +23,467 @@ new IOService({
       }
     });
 
-    $('#add_graduation').on("click",function(e){
+    $('#add_graduation').on("click", function (e) {
       e.preventDefault();
-      self.graduationsFv.validate().then(function(status) {
-        if(status === 'Valid')
-          addGraduation(
-          {
-            self:self,
+      self.graduationsFv.validate().then(function (status) {
+        if (status === 'Valid')
+          addGraduation({
+            self: self,
             graduation_id: $('#graduation_id').val(),
-            graduation_type_id:$('#graduation_type').val(),
-            graduation_type_title:$('#graduation_type option:selected').text(),
-            institution:$('#institution').val(),
-            school:$('#school').val(),
-            ending:$('#ending').val(),
+            graduation_type_id: $('#graduation_type').val(),
+            graduation_type_title: $('#graduation_type option:selected').text(),
+            institution: $('#institution').val(),
+            school: $('#school').val(),
+            ending: $('#ending').val(),
           })
       });
     });
 
-    $('#add_job').on("click",function(e){
+    $('#add_job').on("click", function (e) {
       console.log('teste');
-      
+
       e.preventDefault();
-      self.jobsFv.validate().then(function(status) {
-        if(status === 'Valid')
-          addJob(
-          {
-            self:self,
+      self.jobsFv.validate().then(function (status) {
+        if (status === 'Valid')
+          addJob({
+            self: self,
             job_id: $('#job_id').val(),
-            job_type:$('#job_type').val(),
-            job_type_title:$('#job_type option:selected').text(),
-            job_duration_id:$('#job_duration').val(),
-            job_duration_title:$('#job_duration option:selected').text(),
-            resignation_reason_id:$('#resignation_reason').val(),
-            resignation_reason_title:$('#resignation_reason option:selected').text(),
-            company:$('#company').val(),
-            role:$('#role').val(),
+            job_type: $('#job_type').val(),
+            job_type_title: $('#job_type option:selected').text(),
+            job_duration_id: $('#job_duration').val(),
+            job_duration_title: $('#job_duration option:selected').text(),
+            resignation_reason_id: $('#resignation_reason').val(),
+            resignation_reason_title: $('#resignation_reason option:selected').text(),
+            company: $('#company').val(),
+            role: $('#role').val(),
           })
       });
     });
 
     $('#graduation_form').css("opacity", "0.5");
-    $("#graduation_form input").each(function( index ) {
+    $("#graduation_form input").each(function (index) {
       $(this).attr('disabled', true);
     });
 
-    $('#degree').change(function() {
-      console.log($( this ).find('option:selected'));
-      
-      if( $( this ).find('option:selected').text() == "Ensino superior Completo" ||
-          $( this ).find('option:selected').text() == "Ensino Superior Completo"
-      ){
+    $('#degree').change(function () {
+      console.log($(this).find('option:selected'));
+
+      if ($(this).find('option:selected').text() == "Ensino superior Completo" ||
+        $(this).find('option:selected').text() == "Ensino Superior Completo"
+      ) {
         $('#graduation_form').css("opacity", "1");
-        $("#graduation_form input").each(function( index ) {
+        $("#graduation_form input").each(function (index) {
           $(this).removeAttr('disabled');
         });
       } else {
         $('#graduation_form').css("opacity", "0.5");
-        $("#graduation_form input").each(function( index ) {
+        $("#graduation_form input").each(function (index) {
           $(this).attr('disabled', true);
         });
       }
-      
+
     });
 
-    $("#jobs_form select#resignation_reason, #jobs_form label[for=resignation_reason]").each(function( index ) {
+    $("#jobs_form select#resignation_reason, #jobs_form label[for=resignation_reason]").each(function (index) {
       $(this).css("opacity", "0.5");
       $(this).attr('disabled', true);
     });
-    
-    $('#job_type').change(function() {
 
-      if( $( this ).val() == "J" ){
-        $("#jobs_form select#resignation_reason, #jobs_form label[for=resignation_reason]").each(function( index ) {
+    $('#job_type').change(function () {
+
+      if ($(this).val() == "J") {
+        $("#jobs_form select#resignation_reason, #jobs_form label[for=resignation_reason]").each(function (index) {
           $(this).css("opacity", "1");
           $(this).removeAttr('disabled');
         });
         self.jobsFv.enableValidator('resignation_reason', 'notEmpty');
       } else {
-        $("#jobs_form select#resignation_reason, #jobs_form label[for=resignation_reason]").each(function( index ) {
+        $("#jobs_form select#resignation_reason, #jobs_form label[for=resignation_reason]").each(function (index) {
           $(this).css("opacity", "0.5");
           $(this).attr('disabled', true);
         });
         self.jobsFv.disableValidator('resignation_reason', 'notEmpty');
       }
-      
+
     });
-    
+
     //Datatables initialization
     self.dt = $("#candidates-table").DataTable({
-      aaSorting:[ [0,"desc" ]],
-      ajax: self.path+'/list',
-      initComplete:function(){
+      aaSorting: [
+        [0, "desc"]
+      ],
+      ajax: self.path + '/list',
+      initComplete: function () {
         let api = this.api();
         $.fn.dataTable.defaults.initComplete(this);
       },
-      footerCallback:function(row, data, start, end, display){
-      },
-      columns: [
-        { data: 'id', name: 'id'},
-        { data: 'name', name: 'name'},
-        { data: 'gender', name: 'gender'},
-        { data: 'birthday', name: 'birthday'},
-        { data: 'cpf', name: 'cpf'},
-        { data: 'apprentice', name: 'apprentice'},
-        { data: 'pcd_type', name: 'pcd'},
-        { data: 'actions', name: 'actions'},
+      footerCallback: function (row, data, start, end, display) {},
+      columns: [{
+          data: 'id',
+          name: 'id'
+        },
+        {
+          data: 'name',
+          name: 'name'
+        },
+        {
+          data: 'gender',
+          name: 'gender'
+        },
+        {
+          data: 'birthday',
+          name: 'birthday'
+        },
+        {
+          data: 'cpf',
+          name: 'cpf'
+        },
+        {
+          data: 'apprentice',
+          name: 'apprentice'
+        },
+        {
+          data: 'pcd_type',
+          name: 'pcd'
+        },
+        {
+          data: 'actions',
+          name: 'actions'
+        },
       ],
-      columnDefs: [
-        {targets:'__dt_id',width: "3%",class:"text-center",searchable: true,orderable:true},
-        {targets:'__dt_cpf',width:"10%",searchable: true,orderable:true},
-        {targets:'__dt_idade',width:"7%",className:"text-center",orderable:true,
-          render:function(data,type,row,y){
+      columnDefs: [{
+          targets: '__dt_id',
+          width: "3%",
+          class: "text-center",
+          searchable: true,
+          orderable: true
+        },
+        {
+          targets: '__dt_cpf',
+          width: "10%",
+          searchable: true,
+          orderable: true
+        },
+        {
+          targets: '__dt_idade',
+          width: "7%",
+          className: "text-center",
+          orderable: true,
+          render: function (data, type, row, y) {
             var today = moment();
             var birthday = moment(data);
             return today.diff(birthday, 'years');
           }
         },
-        {targets:'__dt_sexo',width:"7%",className:"text-center",orderable:true,
-          render:function(data,type,row,y){
-            if(data == 'M' || data == 'm')
+        {
+          targets: '__dt_sexo',
+          width: "7%",
+          className: "text-center",
+          orderable: true,
+          render: function (data, type, row, y) {
+            if (data == 'M' || data == 'm')
               return 'Masculino';
             else if (data == 'F' || data == 'f')
               return 'Feminino';
-            else 
+            else
               return data;
           }
         },
-        {targets:'__dt_pcd',width:"7%",className:"text-center",orderable:true,
-          render:function(data,type,row,y){
-            if(data == null)
+        {
+          targets: '__dt_pcd',
+          width: "7%",
+          className: "text-center",
+          orderable: true,
+          render: function (data, type, row, y) {
+            if (data == null)
               return 'Nenhuma';
-            else 
+            else
               return data.title;
           }
         },
-        {targets:'__dt_aprendiz',width:"7%",className:"text-center",orderable:true,
-          render:function(data,type,row,y){
-            if(data == 'N' || data == 'n')
+        {
+          targets: '__dt_aprendiz',
+          width: "7%",
+          className: "text-center",
+          orderable: true,
+          render: function (data, type, row, y) {
+            if (data == 'N' || data == 'n')
               return 'Não';
             else if (data == 'S' || data == 's')
               return 'Sim';
           }
         },
-        {targets:'__dt_acoes',width:"7%",className:"text-center",orderable:true,
-          render:function(data,type,row,y){
+        {
+          targets: '__dt_acoes',
+          width: "7%",
+          className: "text-center",
+          orderable: true,
+          render: function (data, type, row, y) {
             return self.dt.addDTButtons({
-              buttons:[ 
-                {ico:'ico-eye',_class:'text-primary',title:'preview'},
-                {ico:'ico-edit',_class:'text-info',title:'editar'},
-                {ico:'ico-trash',_class:'text-danger',title:'excluir'},
+              buttons: [{
+                  ico: 'ico-eye',
+                  _class: 'text-primary',
+                  title: 'preview'
+                },
+                {
+                  ico: 'ico-edit',
+                  _class: 'text-info',
+                  title: 'editar'
+                },
+                {
+                  ico: 'ico-trash',
+                  _class: 'text-danger',
+                  title: 'excluir'
+                },
               ]
             });
           }
         }
-      ]	
-    }).on('click',".btn-dt-button[data-original-title=editar]",function(){
+      ]
+    }).on('click', ".btn-dt-button[data-original-title=editar]", function () {
       var data = self.dt.row($(this).parents('tr')).data();
       self.view(data.id);
-    }).on('click','.ico-trash',function(){
+    }).on('click', '.ico-trash', function () {
       var data = self.dt.row($(this).parents('tr')).data();
       self.delete(data.id);
-    }).on('click','.ico-eye',function(){
+    }).on('click', '.ico-eye', function () {
       var data = self.dt.row($(this).parents('tr')).data();
-      preview({id:data.id});
-    }).on('draw.dt',function(){
+      preview({
+        id: data.id
+      });
+    }).on('draw.dt', function () {
       $('[data-toggle="tooltip"]').tooltip();
     });
-    
+
     let form = document.getElementById(self.dfId);
     let fv1 = FormValidation.formValidation(
-      form.querySelector('.step-pane[data-step="1"]'),
-      {
-        fields: {
-          'name': {
-            validators: {
-              notEmpty: {
-                enabled: true,
-                message: 'Informe o seu nome!'
-              }
-            }
-          },
-          'birthday': {
-            validators: {
-              notEmpty: {
-                enabled: true,
-                message: 'Informe a sua data de nascimento!'
-              }
-            }
-          },
-          'cpf': {
-            validators: {
-              notEmpty: {
-                enabled: true,
-                message: 'Informe o CPF!'
-              },
-              id:{
-                country:'BR',
-                message: 'CPF inválido',
-              }
-            }
-          },
-          'rg': {
-            validators: {
-              notEmpty: {
-                enabled: true,
-                message: 'Informe o RG!'
-              }
-            }
-          },
-          'cnh': {
-            validators: {
-              notEmpty: {
-                enabled: true,
-                message: 'Informe o CNH!'
-              }
-            }
-          },
-          'marital_status': {
-            validators: {
-              notEmpty: {
-                enabled: true,
-                message: 'Informe o estado civil!'
-              }
-            }
-          },
-          'children_amount': {
-            validators: {
-              notEmpty: {
-                enabled: true,
-                message: 'Informe o número de filhos!'
-              }
-            }
-          },
-          'phone': {
-            validators: {
-              notEmpty: {
-                enabled: true,
-                message: 'Informe o telefone!'
-              }
-            }
-          },
-          'mobile': {
-            validators: {
-              notEmpty: {
-                enabled: true,
-                message: 'Informe o celular!'
-              }
-            }
-          },
-          'email': {
-            validators: {
-              notEmpty: {
-                enabled: true,
-                message: 'Informe o email!'
-              }
-            }
-          },
-          'address_street': {
-            validators: {
-              notEmpty: {
-                enabled: true,
-                message: 'Informe o endereço completo!'
-              }
-            }
-          },
-          'address_district': {
-            validators: {
-              notEmpty: {
-                enabled: true,
-                message: 'Informe o endereço completo!'
-              }
-            }
-          },
-          'address_number': {
-            validators: {
-              notEmpty: {
-                enabled: true,
-                message: 'Informe o endereço completo!'
-              }
-            }
-          },
-          'address_city': {
-            validators: {
-              notEmpty: {
-                enabled: true,
-                message: 'Informe o endereço completo!'
-              }
-            }
-          },
-          'address_state': {
-            validators: {
-              notEmpty: {
-                enabled: true,
-                message: 'Informe o endereço completo!'
-              }
-            }
-          },
-          'gender': {
-            validators: {
-              notEmpty: {
-                enabled: true,
-                message: 'Informe o sexo!'
-              }
-            }
-          },
-          'other_gender': {
-            validators: {
-              notEmpty: {
-                enabled: false,
-                message: 'Informe o sexo!'
-              }
-            }
-          },
-          'salary': {
-            validators: {
-              notEmpty: {
-                enabled: true,
-                message: 'Informe a pretensão salarial!'
-              }
-            }
-          },
-          'zipCode':{
-            validators:{
-              promise: {
+        form.querySelector('.step-pane[data-step="1"]'), {
+          fields: {
+            'name': {
+              validators: {
                 notEmpty: {
-                  message: 'O Cep é obrigatório'
+                  enabled: true,
+                  message: 'Informe o seu nome!'
+                }
+              }
+            },
+            'birthday': {
+              validators: {
+                notEmpty: {
+                  enabled: true,
+                  message: 'Informe a sua data de nascimento!'
+                }
+              }
+            },
+            'cpf': {
+              validators: {
+                notEmpty: {
+                  enabled: true,
+                  message: 'Informe o CPF!'
                 },
-                enabled:true,
-                promise: function (input) {
-                    return new Promise(function(resolve, reject){
-                      if(input.value.replace(/\D/g,'').length<8)
-                        resolve({  
+                id: {
+                  country: 'BR',
+                  message: 'CPF inválido',
+                }
+              }
+            },
+            'rg': {
+              validators: {
+                notEmpty: {
+                  enabled: true,
+                  message: 'Informe o RG!'
+                }
+              }
+            },
+            'cnh': {
+              validators: {
+                notEmpty: {
+                  enabled: true,
+                  message: 'Informe o CNH!'
+                }
+              }
+            },
+            'marital_status': {
+              validators: {
+                notEmpty: {
+                  enabled: true,
+                  message: 'Informe o estado civil!'
+                }
+              }
+            },
+            'children_amount': {
+              validators: {
+                notEmpty: {
+                  enabled: true,
+                  message: 'Informe o número de filhos!'
+                }
+              }
+            },
+            'phone': {
+              validators: {
+                notEmpty: {
+                  enabled: true,
+                  message: 'Informe o telefone!'
+                }
+              }
+            },
+            'mobile': {
+              validators: {
+                notEmpty: {
+                  enabled: true,
+                  message: 'Informe o celular!'
+                }
+              }
+            },
+            'email': {
+              validators: {
+                notEmpty: {
+                  enabled: true,
+                  message: 'Informe o email!'
+                }
+              }
+            },
+            'address_street': {
+              validators: {
+                notEmpty: {
+                  enabled: true,
+                  message: 'Informe o endereço completo!'
+                }
+              }
+            },
+            'address_district': {
+              validators: {
+                notEmpty: {
+                  enabled: true,
+                  message: 'Informe o endereço completo!'
+                }
+              }
+            },
+            'address_number': {
+              validators: {
+                notEmpty: {
+                  enabled: true,
+                  message: 'Informe o endereço completo!'
+                }
+              }
+            },
+            'address_city': {
+              validators: {
+                notEmpty: {
+                  enabled: true,
+                  message: 'Informe o endereço completo!'
+                }
+              }
+            },
+            'address_state': {
+              validators: {
+                notEmpty: {
+                  enabled: true,
+                  message: 'Informe o endereço completo!'
+                }
+              }
+            },
+            'gender': {
+              validators: {
+                notEmpty: {
+                  enabled: true,
+                  message: 'Informe o sexo!'
+                }
+              }
+            },
+            'other_gender': {
+              validators: {
+                notEmpty: {
+                  enabled: false,
+                  message: 'Informe o sexo!'
+                }
+              }
+            },
+            'salary': {
+              validators: {
+                notEmpty: {
+                  enabled: true,
+                  message: 'Informe a pretensão salarial!'
+                }
+              }
+            },
+            'zipCode': {
+              validators: {
+                promise: {
+                  notEmpty: {
+                    message: 'O Cep é obrigatório'
+                  },
+                  enabled: true,
+                  promise: function (input) {
+                    return new Promise(function (resolve, reject) {
+                      if (input.value.replace(/\D/g, '').length < 8)
+                        resolve({
                           valid: false,
                           message: 'Cep Inválido!',
-                          meta:{
-                            data:null
+                          meta: {
+                            data: null
                           }
                         })
-                      else{
+                      else {
                         delete $.ajaxSettings.headers["X-CSRF-Token"];
-                        console.log('teste');
-                          
+
                         $.ajax({
-                          url:`https://viacep.com.br/ws/${$('#zipCode').cleanVal()}/json`,
+                          url: `https://viacep.com.br/ws/${$('#zipCode').cleanVal()}/json`,
                           headers: {
-                            'Content-Type':'application/json',
-                              // 'X-CSRF-Token': laravel_token,
+                            'Content-Type': 'application/json',
+                            // 'X-CSRF-Token': laravel_token,
                           },
                           complete: (jqXHR) => {
                             $.ajaxSettings.headers["X-CSRF-Token"] = laravel_token;
                           },
-                          success:(data)=>{
-                            if(data.erro==true){
+                          success: (data) => {
+                            if (data.erro == true) {
                               resolve({
                                 valid: false,
-                                message:'Cep não encontrado!',
-                                meta:{
-                                  data:null
+                                message: 'Cep não encontrado!',
+                                meta: {
+                                  data: null
                                 }
                               });
-                            }
-                            else{
+                            } else {
                               resolve({
-                                valid:true,
-                                meta:{
+                                valid: true,
+                                meta: {
                                   data
                                 }
                               });
                             }
                           },
-                          error: (data)=>{
+                          error: (data) => {
                             console.log('erro');
                           }
                         });
                       }
                     });
+                  }
                 }
               }
-            }
+            },
           },
-        },
-        plugins:{
-          trigger: new FormValidation.plugins.Trigger(),
-          submitButton: new FormValidation.plugins.SubmitButton(),
-          bootstrap: new FormValidation.plugins.Bootstrap(),
-          icon: new FormValidation.plugins.Icon({
-            valid: 'fv-ico ico-check',
-            invalid: 'fv-ico ico-close',
-            validating: 'fv-ico ico-gear ico-spin'
-          }),
-        },
-    }).setLocale('pt_BR', FormValidation.locales.pt_BR)
-    .on('core.validator.validated', function(e) {
-      if(e.field === 'zipCode' && e.validator === 'promise'){
-        setCEP(e.result.meta.data,self);
-      }
-    });
+          plugins: {
+            trigger: new FormValidation.plugins.Trigger(),
+            submitButton: new FormValidation.plugins.SubmitButton(),
+            bootstrap: new FormValidation.plugins.Bootstrap(),
+            icon: new FormValidation.plugins.Icon({
+              valid: 'fv-ico ico-check',
+              invalid: 'fv-ico ico-close',
+              validating: 'fv-ico ico-gear ico-spin'
+            }),
+          },
+        }).setLocale('pt_BR', FormValidation.locales.pt_BR)
+      .on('core.validator.validated', function (e) {
+        if (e.field === 'zipCode' && e.validator === 'promise') {
+          setCEP(e.result.meta.data, self);
+        }
+      });
 
     let fv2 = FormValidation.formValidation(
-      form.querySelector('.step-pane[data-step="2"]'),
-      {
+      form.querySelector('.step-pane[data-step="2"]'), {
         fields: {
           'degree': {
             validators: {
@@ -433,7 +494,7 @@ new IOService({
             }
           },
         },
-        plugins:{
+        plugins: {
           trigger: new FormValidation.plugins.Trigger(),
           submitButton: new FormValidation.plugins.SubmitButton(),
           bootstrap: new FormValidation.plugins.Bootstrap(),
@@ -443,77 +504,93 @@ new IOService({
             validating: 'fv-ico ico-gear ico-spin'
           }),
         },
-    }).setLocale('pt_BR', FormValidation.locales.pt_BR);
+      }).setLocale('pt_BR', FormValidation.locales.pt_BR);
 
     self.fv = [fv1, fv2];
-    
+
     self.graduations_dt = $('#__graduations_dt').DataTable({
-      "paging":   false,
-      "info":false,
-      "ordering":false,
-      "initComplete":function(){
-      },
-      columnDefs:[
-        {targets:'__dt_id',visible: false,},
-        {targets:'__dt_graduation-type-id',visible: false,},
-        {targets:'__dt_acoes',width:"10%",className:"text-center",searchable:false,
-          orderable:false,render:function(data,type,row,y){
+        "paging": false,
+        "info": false,
+        "ordering": false,
+        "initComplete": function () {},
+        columnDefs: [{
+            targets: '__dt_id',
+            visible: false,
+          },
+          {
+            targets: '__dt_graduation-type-id',
+            visible: false,
+          },
+          {
+            targets: '__dt_acoes',
+            width: "10%",
+            className: "text-center",
+            searchable: false,
+            orderable: false,
+            render: function (data, type, row, y) {
               return self.graduations_dt.addDTButtons({
-                buttons:[
-                  {ico:'ico-edit',_class:'text-info',title:'editar'},
-                  {ico:'ico-trash',_class:'text-danger',title:'excluir'},
-                ]});
+                buttons: [{
+                    ico: 'ico-edit',
+                    _class: 'text-info',
+                    title: 'editar'
+                  },
+                  {
+                    ico: 'ico-trash',
+                    _class: 'text-danger',
+                    title: 'excluir'
+                  },
+                ]
+              });
+            }
           }
-        }
-      ]
-    })
-    .on('click','.ico-trash',function(){
-      self.graduations_dt.row($(this).parents('tr')).remove().draw();
-    })
-    .on('click','.ico-edit',function(){
-      var data = self.graduations_dt.row($(this).parents('tr')).data();
-      $('#graduation_id').val(data[0]);
-      $('#graduation_type').val(data[1]);
-      $('#institution').val(data[3]);
-      $('#school').val(data[4]);
-      $('#ending').val(data[5]);
-    });
+        ]
+      })
+      .on('click', '.ico-trash', function () {
+        self.graduations_dt.row($(this).parents('tr')).remove().draw();
+      })
+      .on('click', '.ico-edit', function () {
+        var data = self.graduations_dt.row($(this).parents('tr')).data();
+        $('#graduation_id').val(data[0]);
+        $('#graduation_type').val(data[1]);
+        $('#institution').val(data[3]);
+        $('#school').val(data[4]);
+        $('#ending').val(data[5]);
+      });
 
     self.graduationsFv = FormValidation.formValidation(
-      form.querySelector('#graduation_form'),
-      {
+      form.querySelector('#graduation_form'), {
         fields: {
           graduation_type: {
-            validators:{
-              notEmpty:{
+            validators: {
+              notEmpty: {
                 enabled: true,
                 message: 'Informe o tipo de graduação!'
               }
             }
-          },   
+          },
           institution: {
-            validators:{
-              notEmpty:{
+            validators: {
+              notEmpty: {
                 enabled: true,
                 message: 'Informe a instituição de ensino!'
               }
             }
-          },   
+          },
           school: {
-            validators:{
-              notEmpty:{
+            validators: {
+              notEmpty: {
                 enabled: true,
                 message: 'Informe o curso!'
               }
             }
-          },   
+          },
           ending: {
-            validators:{
-              digits:{
+            validators: {
+              digits: {
                 enabled: true,
                 message: 'Informe apenas números!'
               },
-              stringLength:{
+              stringLength: {
                 enabled: true,
                 min: 4,
                 max: 4,
@@ -524,12 +601,12 @@ new IOService({
                 max: 2155,
                 message: 'Informe um ano válido!',
               },
-              notEmpty:{
+              notEmpty: {
                 enabled: true,
                 message: 'Informe a data de conclusão! '
               }
             }
-          },          
+          },
         },
         plugins: {
           trigger: new FormValidation.plugins.Trigger(),
@@ -542,89 +619,111 @@ new IOService({
             validating: 'fv-ico ico-gear ico-spin'
           }),
         },
-    }).setLocale('pt_BR', FormValidation.locales.pt_BR);
+      }).setLocale('pt_BR', FormValidation.locales.pt_BR);
 
     self.jobs_dt = $('#__jobs_dt').DataTable({
-      "paging":   false,
-      "info":false,
-      "ordering":false,
-      "initComplete":function(){
-      },
-      columnDefs:[
-        {targets:'__dt_id',visible: false,},
-        {targets:'__dt_job-type',visible: false,},
-        {targets:'__dt_job-duration-id',visible: false,},
-        {targets:'__dt_resignation-reason-id',visible: false,},
-        {targets:'__dt_acoes',width:"10%",className:"text-center",searchable:false,
-          orderable:false,render:function(data,type,row,y){
-            return self.graduations_dt.addDTButtons({
-              buttons:[
-                {ico:'ico-edit',_class:'text-info',title:'editar'},
-                {ico:'ico-trash',_class:'text-danger',title:'excluir'},
-              ]});
+        "paging": false,
+        "info": false,
+        "ordering": false,
+        "initComplete": function () {},
+        columnDefs: [{
+            targets: '__dt_id',
+            visible: false,
+          },
+          {
+            targets: '__dt_job-type',
+            visible: false,
+          },
+          {
+            targets: '__dt_job-duration-id',
+            visible: false,
+          },
+          {
+            targets: '__dt_resignation-reason-id',
+            visible: false,
+          },
+          {
+            targets: '__dt_acoes',
+            width: "10%",
+            className: "text-center",
+            searchable: false,
+            orderable: false,
+            render: function (data, type, row, y) {
+              return self.graduations_dt.addDTButtons({
+                buttons: [{
+                    ico: 'ico-edit',
+                    _class: 'text-info',
+                    title: 'editar'
+                  },
+                  {
+                    ico: 'ico-trash',
+                    _class: 'text-danger',
+                    title: 'excluir'
+                  },
+                ]
+              });
+            }
           }
-        }
-      ]
-    })
-    .on('click','.ico-trash',function(){
-      self.jobs_dt.row($(this).parents('tr')).remove().draw();
-    })
-    .on('click','.ico-edit',function(){
-      var data = self.jobs_dt.row($(this).parents('tr')).data();
-      $('#job_id').val(data[0]);
-      $('#role').val(data[2]);
-      $('#company').val(data[3]);
-      $('#job_type').val(data[5]);
-      $('#job_type').change();
-      $('#job_duration').val(data[6]);
-      $('#resignation_reason').val(data[7]);
+        ]
+      })
+      .on('click', '.ico-trash', function () {
+        self.jobs_dt.row($(this).parents('tr')).remove().draw();
+      })
+      .on('click', '.ico-edit', function () {
+        var data = self.jobs_dt.row($(this).parents('tr')).data();
+        $('#job_id').val(data[0]);
+        $('#role').val(data[2]);
+        $('#company').val(data[3]);
+        $('#job_type').val(data[5]);
+        $('#job_type').change();
+        $('#job_duration').val(data[6]);
+        $('#resignation_reason').val(data[7]);
 
-    });
+      });
 
     self.jobsFv = FormValidation.formValidation(
-      form.querySelector('#jobs_form'),
-      {
+      form.querySelector('#jobs_form'), {
         fields: {
           job_type: {
-            validators:{
-              notEmpty:{
+            validators: {
+              notEmpty: {
                 enabled: true,
                 message: 'Informe o tipo de trabalho!'
               }
             }
-          },   
+          },
           job_duration: {
-            validators:{
-              notEmpty:{
+            validators: {
+              notEmpty: {
                 enabled: true,
                 message: 'Informe a duração do trabalho!'
               }
             }
-          },   
+          },
           resignation_reason: {
-            validators:{
-              notEmpty:{
+            validators: {
+              notEmpty: {
                 enabled: true,
                 message: 'Informe o motivo do desligamento!'
               }
             }
-          },   
+          },
           company: {
-            validators:{
-              notEmpty:{
+            validators: {
+              notEmpty: {
                 enabled: true,
                 message: 'Informe o nome da empresa!'
               }
             }
-          },   
+          },
           role: {
-            validators:{
-              notEmpty:{
+            validators: {
+              notEmpty: {
                 enabled: true,
                 message: 'Informe o cargo ocupado!'
               }
             }
-          },   
+          },
         },
         plugins: {
           trigger: new FormValidation.plugins.Trigger(),
@@ -637,23 +736,21 @@ new IOService({
             validating: 'fv-ico ico-gear ico-spin'
           }),
         },
-    }).setLocale('pt_BR', FormValidation.locales.pt_BR);
+      }).setLocale('pt_BR', FormValidation.locales.pt_BR);
 
-    self.wizardActions(function(graduations_dt=self.graduations_dt, jobs_dt=self.jobs_dt){ 
+    self.wizardActions(function (graduations_dt = self.graduations_dt, jobs_dt = self.jobs_dt) {
       $('#__graduations').val(JSON.stringify(getGraduations(graduations_dt)))
       $('#__jobs').val(JSON.stringify(getJobs(jobs_dt)))
 
       $('#__state').val($('#address_state').val());
-    });    
+    });
 
     self.callbacks.view = view(self);
-    self.callbacks.update.onSuccess = ()=>{
-    }
+    self.callbacks.update.onSuccess = () => {}
 
-    self.callbacks.create.onSuccess = ()=>{
-    }
+    self.callbacks.create.onSuccess = () => {}
 
-    self.callbacks.unload = self=>{
+    self.callbacks.unload = self => {
       $('#graduation_id').val('');
       $('#graduation_type').val('');
       $('#institution').val('');
@@ -666,14 +763,13 @@ new IOService({
       $('#resignation_reason').val('');
       $('#company').val('');
       $('#role').val('');
-    }    
+    }
 
-    self.tabs.cadastrar.tab.on('show.bs.tab',()=>{
-    });
-});
+    self.tabs.cadastrar.tab.on('show.bs.tab', () => {});
+  });
 
-function addGraduation(p){
-  if(p.graduation_id == ''){
+function addGraduation(p) {
+  if (p.graduation_id == '') {
     p.self.graduations_dt.row.add([
       null,
       p.graduation_type_id,
@@ -696,17 +792,17 @@ function addGraduation(p){
     // check if there's any row in the table with the same graduation_id
     var row = null;
     p.self.graduations_dt.rows().data().toArray().forEach((element, index, array) => {
-      if(element[0] == p.graduation_id)
+      if (element[0] == p.graduation_id)
         row = p.self.graduations_dt.row(index);
     })
-    
-    if(row != null) {
+
+    if (row != null) {
       row.data(data).draw(true);
     } else {
       p.self.graduations_dt.row.add(data).draw(true);
     }
   }
-  
+
   $('#graduation_id').val('');
   $('#graduation_type').val('');
   $('#institution').val('');
@@ -718,9 +814,9 @@ function addGraduation(p){
   p.self.graduationsFv.updateFieldStatus('ending', 'NotValidated');
 }
 
-function getGraduations(dt){
+function getGraduations(dt) {
   let graduations = [];
-  dt.data().each( function (row) {
+  dt.data().each(function (row) {
     graduations.push({
       id: row[0],
       graduation_type_id: row[1],
@@ -734,8 +830,8 @@ function getGraduations(dt){
   return graduations;
 }
 
-function addJob(p){
-  if(p.job_id == ''){
+function addJob(p) {
+  if (p.job_id == '') {
     p.self.jobs_dt.row.add([
       null,
       p.job_type_title,
@@ -764,16 +860,16 @@ function addJob(p){
     // check if there's any row in the table with the same job_id
     var row = null;
     p.self.jobs_dt.rows().data().toArray().forEach((element, index, array) => {
-      if(element[0] == p.job_id)
+      if (element[0] == p.job_id)
         row = p.self.jobs_dt.row(index);
     })
-    
-    if(row != null) {
+
+    if (row != null) {
       row.data(data).draw(true);
     } else {
       p.self.jobs_dt.row.add(data).draw(true);
     }
-    
+
   }
 
   $('#job_id').val('');
@@ -789,9 +885,9 @@ function addJob(p){
   p.self.jobsFv.updateFieldStatus('role', 'NotValidated');
 }
 
-function getJobs(dt){
+function getJobs(dt) {
   let jobs = [];
-  dt.data().each( function (row) {
+  dt.data().each(function (row) {
     console.log(row);
     jobs.push({
       id: row[0],
@@ -803,135 +899,132 @@ function getJobs(dt){
       job_duration_id: row[6],
       resignation_reason_id: row[7],
     })
-  } );
+  });
 
   return jobs;
 }
 
-function view(self){
-  return{
-      onSuccess:function(data){
+function view(self) {
+  return {
+    onSuccess: function (data) {
 
-        console.log(data);
-        
-        $('#name').val(data.name);
-        $('#social_name').val(data.social_name);
-        $('#cpf').val(data.cpf);
-        $('#cnh').val(data.cnh);
-        $('#rg').val(data.rg);
-        $('#email').val(data.email);
-        $('#phone').val(data.phone);
-        $('#mobile').val(data.mobile);
+      console.log(data);
 
-        if(data.gender == 'Masculino' || data.gender == 'Feminino')
-          $('input[name="gender"][value="'+data.gender+'"]').prop( "checked", true );
-        else {
-          $('input[name="gender"][value="Outros"]').prop( "checked", true );
-          $('#other_gender').val(data.gender);
-          $('#other_gender').removeAttr('disabled');
-        }
+      $('#name').val(data.name);
+      $('#social_name').val(data.social_name);
+      $('#cpf').val(data.cpf);
+      $('#cnh').val(data.cnh);
+      $('#rg').val(data.rg);
+      $('#email').val(data.email);
+      $('#phone').val(data.phone);
+      $('#mobile').val(data.mobile);
 
-        $('#zipCode').val(data.zipCode);
-        // load city name and uf
-        self.fv[0].revalidateField('zipCode').then((status) => {
-          $('#address_street').val(data.address_street);
-          $('#address_number').val(data.address_number);
-          self.fv[0].revalidateField('address_number')
-          $('#address_district').val(data.address_district);
-        });
-
-        $('#children_amount').val(data.children_amount.id);
-        $('#degree').val(data.degree.id);
-        $('#degree').change();
-        $('#salary').val(data.salary.id);
-        $('#marital_status').val(data.marital_status.id);
-        $("#birthday").pickadate('picker').set('select',new Date(data.birthday));
-
-        data.job_experiences.forEach((item) => {
-          addJob({
-            self:self,
-            job_id: item.id,
-            job_type_title: item.type == 'J' ? 'Profissional' : 'Voluntario',
-            role: item.role,
-            company: item.company,
-            job_duration_title: item.job_duration.title,
-
-            job_type: item.type,
-            job_duration_id: item.job_duration.id,
-            resignation_reason_id: item.resignation_reason_id != null ? item.resignation_reason.id : null,
-          })
-        })
-
-        data.graduations.forEach((item) => {
-          addGraduation({
-            self:self,
-            graduation_id: item.id,
-            graduation_type_id: item.graduation_type.id,
-            graduation_type_title: item.graduation_type.title,
-            institution: item.institution,
-            school: item.school,
-            ending: item.ending,
-          })
-        })
-
-      }, 
-      onError:function(self){
-        console.error(self);
+      if (data.gender == 'Masculino' || data.gender == 'Feminino')
+        $('input[name="gender"][value="' + data.gender + '"]').prop("checked", true);
+      else {
+        $('input[name="gender"][value="Outros"]').prop("checked", true);
+        $('#other_gender').val(data.gender);
+        $('#other_gender').removeAttr('disabled');
       }
+
+      $('#zipCode').val(data.zipCode);
+      // load city name and uf
+      self.fv[0].revalidateField('zipCode').then((status) => {
+        $('#address_street').val(data.address_street);
+        $('#address_number').val(data.address_number);
+        self.fv[0].revalidateField('address_number')
+        $('#address_district').val(data.address_district);
+      });
+
+      $('#children_amount').val(data.children_amount.id);
+      $('#degree').val(data.degree.id);
+      $('#degree').change();
+      $('#salary').val(data.salary.id);
+      $('#marital_status').val(data.marital_status.id);
+      $("#birthday").pickadate('picker').set('select', new Date(data.birthday));
+
+      data.job_experiences.forEach((item) => {
+        addJob({
+          self: self,
+          job_id: item.id,
+          job_type_title: item.type == 'J' ? 'Profissional' : 'Voluntario',
+          role: item.role,
+          company: item.company,
+          job_duration_title: item.job_duration.title,
+
+          job_type: item.type,
+          job_duration_id: item.job_duration.id,
+          resignation_reason_id: item.resignation_reason_id != null ? item.resignation_reason.id : null,
+        })
+      })
+
+      data.graduations.forEach((item) => {
+        addGraduation({
+          self: self,
+          graduation_id: item.id,
+          graduation_type_id: item.graduation_type.id,
+          graduation_type_title: item.graduation_type.title,
+          institution: item.institution,
+          school: item.school,
+          ending: item.ending,
+        })
+      })
+
+    },
+    onError: function (self) {
+      console.error(self);
     }
+  }
 }
 
-function checkFeatures(){
+function checkFeatures() {
   let feats = [];
-  $('#features .feature.active').each((i,obj)=>{
+  $('#features .feature.active').each((i, obj) => {
     feats.push(obj.getAttribute('value'));
   })
 
   return feats;
 }
 
-function setCEP(data,self){
+function setCEP(data, self) {
 
   const _conf = self.toView;
-  
-  if(self.toView !== null && $('zipCode').val() == _conf.zipCode){
 
-    if($('address_street').val() == "" && _conf.address_street !== ""){
+  if (self.toView !== null && $('zipCode').val() == _conf.zipCode) {
+
+    if ($('address_street').val() == "" && _conf.address_street !== "") {
       $('address_street').val(_conf.address_street);
     }
 
-    if($('address_district').val() == "" && _conf.address_district !== "")
+    if ($('address_district').val() == "" && _conf.address_district !== "")
       $('address_district').val(_conf.address_district);
-  
+
     $('address_city').val(data.localidade);
     $('address_state').val(data.uf);
     $('address_street').focus();
-  }
-  else{
-    if(data!==null){
-      if(data.logradouro !==''){
-         $('#address_street').val(`${data.logradouro}${data.complemento!=''? ', '+data.complemento : ''}`);
-         $('#address_district').val(data.bairro);
-         $('#address_number').focus();
-      }
-      else
+  } else {
+    if (data !== null) {
+      if (data.logradouro !== '') {
+        $('#address_street').val(`${data.logradouro}${data.complemento!=''? ', '+data.complemento : ''}`);
+        $('#address_district').val(data.bairro);
+        $('#address_number').focus();
+      } else
         $('#address_street').focus();
-   
+
       $('#address_city').val(data.localidade);
       $('#address_state').val(data.uf);
 
-      document.getElementById('address_city').setAttribute('data-ibge',data.ibge);
+      document.getElementById('address_city').setAttribute('data-ibge', data.ibge);
       document.getElementById('__city').value = data.ibge;
-    }
-    else{
+    } else {
       $('#address_street, #address_district, #address_city, #address_state').val('');
-      document.getElementById('address_city').setAttribute('data-ibge','');
+      document.getElementById('address_city').setAttribute('data-ibge', '');
     }
   }
 
   self.fv[0].revalidateField('address_street');
-  self.fv[0].revalidateField('address_district'); 
+  self.fv[0].revalidateField('address_district');
   self.fv[0].revalidateField('address_city');
-  self.fv[0].revalidateField('address_number'); 
-  self.fv[0].revalidateField('address_state'); 
+  self.fv[0].revalidateField('address_number');
+  self.fv[0].revalidateField('address_state');
 }
