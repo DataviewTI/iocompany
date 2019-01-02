@@ -2,12 +2,41 @@
 namespace Dataview\IOCompany;
 
 use Dataview\IntranetOne\IOModel;
-// use Dataview\IntranetOne\File as ProjectFile;
 use Dataview\IntranetOne\Group;
-// use Illuminate\Support\Facades\Storage;
+use Cartalyst\Sentinel\Users\EloquentUser as EloquentUser;
+use OwenIt\Auditing\Auditable;
+use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Company extends IOModel
+class Company extends EloquentUser implements AuditableContract
 {
+
+  // Sentinel
+    protected $table = 'companies';
+    protected $loginNames = ['cnpj'];
+  // ---------
+
+  // IOModel
+    use Auditable;
+    use SoftDeletes;
+    protected $auditTimestamps = true;
+
+    protected $dates = ['deleted_at'];
+
+    public function setAppend($index,$value){
+      $this->appends[$index] = $value;
+    }
+
+    public function getAppend($index){
+      return $this->appends[$index];
+    }
+    
+    public static function pkgAddr($addr){
+      return __DIR__.'/'.$addr;
+    } 
+  // ---------
+
   protected  $primaryKey = 'cnpj';
   public $incrementing = false;
 
@@ -36,7 +65,6 @@ class Company extends IOModel
   protected $appends = [
     'group' => false,
   ];
-
 
   protected $casts = [
     'data' => 'array',

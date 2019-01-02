@@ -25,6 +25,8 @@ class IOCompanyServiceProvider extends ServiceProvider
     $this->app['router']->group(['namespace' => 'dataview\iocompany'], function () {
       include __DIR__.'/routes/web.php';
     });
+
+    $this->app['router']->aliasMiddleware('company_auth', '\Dataview\IOCompany\Http\Middleware\CompanySentinelAuth');
   
     $this->app->make('Dataview\IOCompany\CompanyController');
     $this->app->make('Dataview\IOCompany\CandidateController');

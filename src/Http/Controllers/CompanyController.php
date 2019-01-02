@@ -14,7 +14,7 @@ use Dataview\IntranetOne\Group;
 use Validator;
 use DataTables;
 use Session;
-use Sentinel;
+use App\Facades\CompanySentinel;
 
 class CompanyController extends IOController{
 
@@ -64,22 +64,30 @@ class CompanyController extends IOController{
     
 
 	public function create(CompanyRequest $request){
-    $check = $this->__create($request);
-    if(!$check['status'])
-      return response()->json(['errors' => $check['errors'] ], $check['code']);	
-      
-    $obj = new Company($request->all());
-    // if($request->sizes!= null){
-    //   $obj->setAppend("sizes",$request->sizes);
-    //   //$obj->setAppend("has_images",$request->has_images);
-    //   $obj->save();
-    // }
-    //if($request->sizes!= null && $request->has_images>0){
-      //$obj->group->manageImages(json_decode($request->__dz_images),json_decode($request->sizes));
-      $obj->save();
-    //}
+    dump($request->all());
 
-    return response()->json(['success'=>true,'data'=>null]);
+    $company = CompanySentinel::registerAndActivate($request->all());
+    dump($company);
+
+
+		// $company->save();
+
+    // $check = $this->__create($request);
+    // if(!$check['status'])
+    //   return response()->json(['errors' => $check['errors'] ], $check['code']);	
+      
+    // $obj = new Company($request->all());
+    // // if($request->sizes!= null){
+    // //   $obj->setAppend("sizes",$request->sizes);
+    // //   //$obj->setAppend("has_images",$request->has_images);
+    // //   $obj->save();
+    // // }
+    // //if($request->sizes!= null && $request->has_images>0){
+    //   //$obj->group->manageImages(json_decode($request->__dz_images),json_decode($request->sizes));
+    //   $obj->save();
+    // //}
+
+    // return response()->json(['success'=>true,'data'=>null]);
 	}
 
   public function view($id){
