@@ -6,7 +6,7 @@ use Dataview\IntranetOne\Group;
 
 class Job extends IOModel
 {
-  protected $fillable = ['date_start', 'date_end', 'interval', 'gender', 'observations'];
+  protected $fillable = ['date_start', 'date_end', 'interval', 'gender', 'observations', 'hirer_info'];
 
   protected $appends = [
     'group' => false,
