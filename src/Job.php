@@ -13,6 +13,7 @@ class Job extends IOModel
   ];
 
   protected $casts = [
+    'hirer_info' => 'array'
   ];
 
   public function group(){
