@@ -19,7 +19,7 @@ class CreateJobsTable extends Migration
             $table->integer('degree_id')->unsigned();
             $table->enum('gender',['I','M','F'])->default('I');
             $table->enum('apprentice',['S','N'])->default('N');
-            $table->longText('hirer_info');
+            $table->longText('hirer_info')->nullable();
             $table->integer('pcd_type_id')->unsigned()->nullable();
             $table->integer('salary_id')->unsigned();
 
