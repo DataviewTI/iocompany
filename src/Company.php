@@ -8,7 +8,7 @@ use OwenIt\Auditing\Auditable;
 use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class Company extends Authenticatable 
+class Company extends Authenticatable implements AuditableContract
 {
   // IOModel -------------------------------
   use Auditable;
