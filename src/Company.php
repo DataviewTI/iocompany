@@ -53,6 +53,7 @@ class Company extends Authenticatable implements AuditableContract
     'password',
     'last_login',
     'remember_token',
+    'active', 
   ];
 
   protected $appends = [

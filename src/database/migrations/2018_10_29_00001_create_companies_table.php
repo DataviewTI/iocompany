@@ -27,7 +27,8 @@ class CreateCompaniesTable extends Migration
         $table->char('city_id',7);
         $table->integer('group_id')->unsigned()->nullable();
 				$table->string('description')->nullable();
-				$table->text('data')->nullable();
+        $table->text('data')->nullable();
+        $table->boolean('active')->default(0);
         $table->timestamps();
 				$table->softDeletes();
         $table->foreign('city_id')->references('id')->on('cities')->onDelete('cascade')->onUpdate('cascade');
