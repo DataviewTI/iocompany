@@ -100,6 +100,16 @@ class JobController extends IOController{
       'profile',
       'degree',
       'company',
+      'company'=>function($query){
+        $pkg = json_decode(file_get_contents(base_path('composer.json')),true);
+        $hasSpatie = array_has($pkg, 'require.spatie/laravel-permission');  
+        if($hasSpatie) {
+          $query->select('*')
+          ->with('roles');
+        }else{
+          $query->select('*');
+        }
+      },
       'cboOccupation',
       'salary',
       'pcdType',
@@ -110,6 +120,7 @@ class JobController extends IOController{
 	}
 	
 	public function update($id, JobRequest $request){
+    dump($request->all());
     $check = $this->__update($request);
     if(!$check['status'])
       return response()->json(['errors' => $check['errors']], $check['code']);	
@@ -121,6 +132,7 @@ class JobController extends IOController{
     $_old->gender = $request->gender;
     $_old->apprentice = $request->apprentice;
     $_old->observations = $request->observations;
+    $_old->hirer_info = $request->hirer_info;
     
     $_old->cboOccupation()->associate(
       CBOOccupation::where('occupation',$request->cbo)->first()

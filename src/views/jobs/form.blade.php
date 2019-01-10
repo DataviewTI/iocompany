@@ -10,4 +10,5 @@
         ]
     ])
     @endcomponent
+    <input type="hidden" name="has_hirer_info" value="false" id="has_hirer_info">
   </form>

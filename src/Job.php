@@ -52,7 +52,13 @@ class Job extends IOModel
 
   public function company()
   {
-    return $this->belongsTo('Dataview\IOCompany\Company', 'company_id');
+    $pkg = json_decode(file_get_contents(base_path('composer.json')),true);
+    $hasSpatie = array_has($pkg, 'require.spatie/laravel-permission');  
+    if($hasSpatie) {
+      return $this->belongsTo('\App\Company', 'company_id');
+    } else {
+      return $this->belongsTo('Dataview\IOCompany\Company', 'company_id');
+    }
   }
 
   public static function boot(){

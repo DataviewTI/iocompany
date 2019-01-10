@@ -60,6 +60,14 @@ new IOService({
                     name: 'nomeFantasia'
                 },
                 {
+                    data: 'active',
+                    name: 'active'
+                },
+                {
+                    data: 'recruiter',
+                    name: 'recruiter'
+                },
+                {
                     data: 'actions',
                     name: 'actions'
                 },
@@ -81,6 +89,58 @@ new IOService({
                     width: "30%",
                     searchable: true,
                     orderable: true
+                },
+                {
+                    targets: '__dt_ativo',
+                    width: "7%",
+                    className: "text-center",
+                    render: function (data, type, row, y) {
+                        if (data)
+                            return self.dt.addDTIcon({
+                                ico: 'ico-check',
+                                value: 1,
+                                title: 'usuario ativado',
+                                pos: 'left',
+                                _class: 'text-success'
+                            });
+                        else
+                            return self.dt.addDTIcon({
+                                value: 0,
+                                _class: 'invisible'
+                            });
+                    }
+
+                },
+                {
+                    targets: '__dt_recrutador',
+                    width: "7%",
+                    className: "text-center",
+                    render: function (data, type, row, y) {
+                        var recruiter = null;
+                        if (row.roles.length > 0)
+                            row.roles.forEach(function (item, index) {
+
+                                if (item.name == "recruiter") {
+                                    recruiter = true;
+                                }
+
+                            })
+                        else
+                            return self.dt.addDTIcon({
+                                value: 0,
+                                _class: 'invisible'
+                            });
+
+                        if (recruiter)
+                            return self.dt.addDTIcon({
+                                ico: 'ico-check',
+                                value: 1,
+                                title: 'usuario ativado',
+                                pos: 'left',
+                                _class: 'text-success'
+                            });
+                    }
+
                 },
                 {
                     targets: '__dt_acoes',
@@ -289,8 +349,6 @@ new IOService({
         self.fv = [fv1];
 
 
-
-
         self.wizardActions(function () {
 
             document.getElementById('cnpj').removeAttribute('disabled');
@@ -315,12 +373,10 @@ new IOService({
             document.getElementById('cnpj').setAttribute('disabled', 'true');
         }
 
-
-        self.callbacks.create.onSuccess = () => {
-
-        }
+        self.callbacks.create.onSuccess = (data) => {}
 
         self.callbacks.unload = self => {
+            $(".aanjulena-btn-toggle").aaDefaultState();
             $('#cnpj, #nomeFantasia, #razaoSocial, #phone1, #mobile1, #email,#odin-address, #address2, #city, #state', '#numberApto').val('');
         }
 

@@ -3,7 +3,7 @@
 {{-- page level styles --}}
 @section('header_styles')
 <link rel="stylesheet" type="text/css" href="{{ asset('css/pickadate-full.min.css') }}">
-<link rel="stylesheet" type="text/css" href="{{ asset('io/services/io-job.min.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ asset('io/services/io-jobs.min.css') }}">
 @stop
 
 @section('main-heading')
@@ -38,7 +38,7 @@
 @section('footer_scripts')
   <script assync defer src="{{ asset('js/optimized_cbo.js') }}" charset="ISO-8859-1"></script>
 	<script src="{{ asset('js/pickadate-full.min.js') }}"></script>
-	<script src="{{ asset('io/services/io-company-mix-babel.min.js') }}"></script>
-	<script src="{{ asset('io/services/io-company-mix.min.js') }}"></script>
+	<script src="{{ asset('io/services/io-jobs-mix-babel.min.js') }}"></script>
+	<script src="{{ asset('io/services/io-jobs-mix.min.js') }}"></script>
 	<script src="{{ asset('io/services/io-jobs.min.js') }}"></script>
 @stop

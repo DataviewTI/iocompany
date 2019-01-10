@@ -7,6 +7,7 @@ use Illuminate\Http\Response;
 
 use App\Http\Requests;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Dataview\IOCompany\CompanyRequest;
 use Dataview\IOCompany\Company;
 use Dataview\IOCompany\CBOOccupation;
@@ -27,21 +28,45 @@ class CompanyController extends IOController{
 	}
 	
 	public function simplifiedList(){
-
-    $query = Company::select("cnpj",'razaoSocial','nomeFantasia')->get();
+    $pkg = json_decode(file_get_contents(base_path('composer.json')),true);
+    $hasSpatie = array_has($pkg, 'require.spatie/laravel-permission');  
+  
+    if($hasSpatie) {
+      $query = \App\Company::select('cnpj','razaoSocial','nomeFantasia')
+      ->with([
+        'roles'
+      ])
+      ->get();
+    } else {
+      $query = Company::select("cnpj",'razaoSocial','nomeFantasia')->get();
+    }
   
     return json_encode($query);
   }
   
   public function list(){
-    $query = Company::select('cnpj','razaoSocial','nomeFantasia')
-    ->with([
-      'group'=>function($query){
-        $query->select('groups.id','sizes');
-      }
-    ])
-    ->get();
-  
+    $pkg = json_decode(file_get_contents(base_path('composer.json')),true);
+    $hasSpatie = array_has($pkg, 'require.spatie/laravel-permission');  
+
+    if($hasSpatie) {
+      $query = \App\Company::select('cnpj','razaoSocial','nomeFantasia', 'active')
+      ->with([
+        'group'=>function($query){
+          $query->select('groups.id','sizes');
+        },
+        'roles'
+      ])
+      ->get();
+    } else {
+      $query = Company::select('cnpj','razaoSocial','nomeFantasia', 'active')
+      ->with([
+        'group'=>function($query){
+          $query->select('groups.id','sizes');
+        }
+      ])
+      ->get();
+    }
+
     return Datatables::of(collect($query))->make(true);
   }
 
@@ -64,22 +89,35 @@ class CompanyController extends IOController{
     
 
 	public function create(CompanyRequest $request){
+    // dump($request->all());
+
     $check = $this->__create($request);
     if(!$check['status'])
       return response()->json(['errors' => $check['errors'] ], $check['code']);	
-      
-    $obj = new Company($request->all());
-    // if($request->sizes!= null){
-    //   $obj->setAppend("sizes",$request->sizes);
-    //   //$obj->setAppend("has_images",$request->has_images);
-    //   $obj->save();
-    // }
-    //if($request->sizes!= null && $request->has_images>0){
-      //$obj->group->manageImages(json_decode($request->__dz_images),json_decode($request->sizes));
-      $obj->save();
-    //}
 
-    return response()->json(['success'=>true,'data'=>null]);
+    $pkg = json_decode(file_get_contents(base_path('composer.json')),true);
+    $hasSpatie = array_has($pkg, 'require.spatie/laravel-permission');  
+
+    if($hasSpatie) {
+      $obj = new \App\Company($request->all());
+      $password = str_random(8);
+      $obj->password = Hash::make($password);
+      if($request->recruiter){
+        $obj->assignRole('recruiter');
+      }
+      $obj->save();
+      // dump($obj);
+      // dump($obj->getRoleNames());
+      return response()->json(['success'=>true,'data'=>$obj]);
+  
+    } else {
+      $obj = new Company($request->all());
+      $obj->password = Hash::make(str_random(8));
+      $obj->save();
+
+      return response()->json(['success'=>true,'data'=>$obj]);
+    }
+
 	}
 
   public function view($id){
@@ -88,17 +126,33 @@ class CompanyController extends IOController{
     if(!$check['status'])
       return response()->json(['errors' => $check['errors'] ], $check['code']);	
 
-    $query = Company::select('cnpj','razaoSocial','nomeFantasia','phone','mobile','zipCode','address','address2','city_id','email','numberApto')
+    $pkg = json_decode(file_get_contents(base_path('composer.json')),true);
+    $hasSpatie = array_has($pkg, 'require.spatie/laravel-permission');  
+  
+    if($hasSpatie) {
+      $query = \App\Company::select('cnpj','razaoSocial','nomeFantasia','phone','mobile','zipCode','address','address2','city_id','email','numberApto')
       ->with([
-          'group'=>function($query){
+        'group'=>function($query){
+          $query->select('groups.id','sizes')
+          ->with('files');
+        },
+        'roles'
+      ])
+      ->where('cnpj',$id)
+      ->get();
+    } else {
+      $query = Company::select('cnpj','razaoSocial','nomeFantasia','phone','mobile','zipCode','address','address2','city_id','email','numberApto')
+      ->with([
+        'group'=>function($query){
           $query->select('groups.id','sizes')
           ->with('files');
         },
       ])
       ->where('cnpj',$id)
       ->get();
+    }
 				
-			return response()->json(['success'=>true,'data'=>$query]);
+    return response()->json(['success'=>true,'data'=>$query]);
 	}
 	
 	public function update($id,CompanyRequest $request){

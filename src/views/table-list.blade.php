@@ -12,6 +12,8 @@
 			["title" => "CNPJ"],
 			["title" => "Razão Social"],
 			["title" => "Nome Fantasia"],
+			["title" => "Ativo?"],
+			["title" => "Recrutador?"],
 			["title" => "Ações"],
 		]
 	])

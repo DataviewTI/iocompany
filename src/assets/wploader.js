@@ -47,17 +47,25 @@ function IOCompany(params = {}) {
 
         mix.styles([
             IO.src.io.root + 'custom/custom-devbridge.css',
-            $.dep.service + 'job.css',
+            $.dep.service + 'jobs.css',
             IO.dep.io.toastr + 'toastr.min.css',
             IO.src.io.css + 'toastr.css',
-        ], IO.dest.io.root + 'services/io-job.min.css');
+        ], IO.dest.io.root + 'services/io-jobs.min.css');
 
         mix.babel([
+            IO.src.js + 'extensions/ext-jquery.js',
+            IO.src.io.vendors + 'aanjulena-bs-toggle-switch/aanjulena-bs-toggle-switch.js',
+        ], IO.dest.io.root + 'services/io-jobs-mix-babel.min.js');
+
+        mix.scripts([
             $.dep.devbridgeAC + 'jquery.autocomplete.min.js',
-            IO.dep.io.toastr + 'toastr.min.js',
-            IO.src.io.js + 'defaults/def-toastr.js',
-            $.dep.service + 'job.js',
-        ], IO.dest.io.root + 'services/io-jobs.min.js');
+            IO.dep.jquery_mask + 'jquery.mask.min.js',
+            IO.src.js + 'extensions/ext-jquery.mask.js',
+            $.dep.moment + 'min/moment.min.js',
+            IO.src.io.vendors + 'moment/moment-pt-br.js',
+        ], IO.dest.io.root + 'services/io-jobs-mix.min.js');
+
+        mix.babel($.dep.service + 'jobs.js', IO.dest.io.root + 'services/io-jobs.min.js');
 
         mix.js([
             IO.dep.jquery_mask + 'jquery.mask.min.js',
