@@ -7,6 +7,8 @@ use Illuminate\Http\Response;
 
 use App\Http\Requests;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\NewCompanyCreated;
 use Illuminate\Support\Facades\Hash;
 use Dataview\IOCompany\CompanyRequest;
 use Dataview\IOCompany\Company;
@@ -86,11 +88,7 @@ class CompanyController extends IOController{
     return Datatables::of(collect($query->get()))->make(true);
   }
   
-    
-
 	public function create(CompanyRequest $request){
-    // dump($request->all());
-
     $check = $this->__create($request);
     if(!$check['status'])
       return response()->json(['errors' => $check['errors'] ], $check['code']);	
@@ -106,8 +104,8 @@ class CompanyController extends IOController{
         $obj->assignRole('recruiter');
       }
       $obj->save();
-      // dump($obj);
-      // dump($obj->getRoleNames());
+      Mail::to($obj->email)->send(new NewCompanyCreated(['cnpj' => $request->cnpj, 'password' => $password]));
+
       return response()->json(['success'=>true,'data'=>$obj]);
   
     } else {
@@ -117,7 +115,6 @@ class CompanyController extends IOController{
 
       return response()->json(['success'=>true,'data'=>$obj]);
     }
-
 	}
 
   public function view($id){
@@ -130,7 +127,7 @@ class CompanyController extends IOController{
     $hasSpatie = array_has($pkg, 'require.spatie/laravel-permission');  
   
     if($hasSpatie) {
-      $query = \App\Company::select('cnpj','razaoSocial','nomeFantasia','phone','mobile','zipCode','address','address2','city_id','email','numberApto')
+      $query = \App\Company::select('cnpj','razaoSocial','nomeFantasia','phone','mobile','zipCode','address','address2','city_id','email','numberApto', 'active')
       ->with([
         'group'=>function($query){
           $query->select('groups.id','sizes')
@@ -141,7 +138,7 @@ class CompanyController extends IOController{
       ->where('cnpj',$id)
       ->get();
     } else {
-      $query = Company::select('cnpj','razaoSocial','nomeFantasia','phone','mobile','zipCode','address','address2','city_id','email','numberApto')
+      $query = Company::select('cnpj','razaoSocial','nomeFantasia','phone','mobile','zipCode','address','address2','city_id','email','numberApto', 'active')
       ->with([
         'group'=>function($query){
           $query->select('groups.id','sizes')
@@ -160,31 +157,37 @@ class CompanyController extends IOController{
     if(!$check['status'])
       return response()->json(['errors' => $check['errors'] ], $check['code']);	
 
+    $pkg = json_decode(file_get_contents(base_path('composer.json')),true);
+    $hasSpatie = array_has($pkg, 'require.spatie/laravel-permission');  
+    
+    if($hasSpatie) {
+      $_new = (object) $request->all();
+      $_old = \App\Company::find($id);
+      
+      $upd = ['address','address2','city_id','email','phone','mobile','nomeFantasia','razaoSocial','zipCode','numberApto', 'active'];
+
+      foreach($upd as $u)
+        $_old->{$u} = $_new->{$u};
+
+      if($request->recruiter){
+        $_old->assignRole('recruiter');
+      }else {
+        $_old->removeRole('recruiter');
+      }
+      
+			return response()->json(['success'=>$_old->save()]);
+    } else {
       $_new = (object) $request->all();
       $_old = Company::find($id);
       
-      $upd = ['address','address2','city_id','email','phone','mobile','nomeFantasia','razaoSocial','zipCode','numberApto'];
+      $upd = ['address','address2','city_id','email','phone','mobile','nomeFantasia','razaoSocial','zipCode','numberApto', 'active'];
 
       foreach($upd as $u)
         $_old->{$u} = $_new->{$u};
       
-      // if($_old->group != null){
-      //   $_old->group->sizes = $_new->sizes;
-      //   $_old->group->manageImages(json_decode($_new->__dz_images),json_decode($_new->sizes));
-      //   $_old->group->save();
-      // }
-      // else{
-      //   if(count(json_decode($_new->__dz_images))>0){
-      //     $_old->group()->associate(Group::create([
-      //       'group' => "Avatar da configuração ".$id,
-      //       'sizes' => $_new->sizes
-      //       ])
-      //     );
-      //     $_old->group->manageImages(json_decode($_new->__dz_images),json_decode($_new->sizes));
-			// 	}
-      // }
-		
 			return response()->json(['success'=>$_old->save()]);
+    }
+      
 	}
 
   public function delete($id){
