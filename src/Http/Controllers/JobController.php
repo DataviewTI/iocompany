@@ -120,7 +120,6 @@ class JobController extends IOController{
 	}
 	
 	public function update($id, JobRequest $request){
-    dump($request->all());
     $check = $this->__update($request);
     if(!$check['status'])
       return response()->json(['errors' => $check['errors']], $check['code']);	
