@@ -10,6 +10,10 @@ class IOCompanyServiceProvider extends ServiceProvider
   }
 
   public function boot(){
+    $this->publishes([
+      __DIR__.'/config/wirecard.php' => config_path('wirecard.php'),
+    ]);
+
     $this->loadViewsFrom(__DIR__.'/views', 'Company');
     $this->loadViewsFrom(__DIR__.'/views/candidates', 'Candidate');
     $this->loadViewsFrom(__DIR__.'/views/jobs', 'Job');
@@ -28,6 +32,7 @@ class IOCompanyServiceProvider extends ServiceProvider
   
     $this->app->make('Dataview\IOCompany\CompanyController');
     $this->app->make('Dataview\IOCompany\CandidateController');
+    $this->app->make('Dataview\IOCompany\OrderController');
     $this->app->make('Dataview\IOCompany\JobController');
     $this->app->make('Dataview\IOCompany\CompanyRequest');
     $this->app->make('Dataview\IOCompany\CandidateRequest');

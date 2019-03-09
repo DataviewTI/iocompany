@@ -17,6 +17,7 @@
 				["title" => "CNPJ"],
 				["title" => "Razão Social"],
 				["title" => "Nome Fantasia"],
+				["title" => "Email"],
 				["title" => "Ativo?"],
 				["title" => "Recrutador?"],
 				["title" => "Ações"],
@@ -30,6 +31,7 @@
 				["title" => "CNPJ"],
 				["title" => "Razão Social"],
 				["title" => "Nome Fantasia"],
+				["title" => "Email"],
 				["title" => "Ativo?"],
 				["title" => "Ações"],
 			]

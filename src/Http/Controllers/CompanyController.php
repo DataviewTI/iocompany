@@ -51,7 +51,7 @@ class CompanyController extends IOController{
     $hasSpatie = array_has($pkg, 'require.spatie/laravel-permission');  
 
     if($hasSpatie) {
-      $query = \App\Company::select('cnpj','razaoSocial','nomeFantasia', 'active')
+      $query = \App\Company::select('cnpj','razaoSocial','nomeFantasia', 'active', 'email')
       ->with([
         'group'=>function($query){
           $query->select('groups.id','sizes');

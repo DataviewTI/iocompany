@@ -74,6 +74,10 @@ class Company extends Authenticatable implements AuditableContract
     return $this->hasMany('Dataview\IOCompany\Job');
   }
 
+  public function city(){
+    return $this->belongsTo('Dataview\IOCompany\City');
+  }
+
   public static function boot(){
     parent::boot(); 
     static::created(function (Company $obj) {

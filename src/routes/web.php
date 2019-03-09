@@ -11,6 +11,14 @@ Route::group(['prefix' => 'admin', 'middleware' => ['web','admin'], 'as' => 'adm
     Route::get('delete/{id}', 'CompanyController@delete');			
   });
 
+  Route::group(['prefix' => 'orders'], function () {
+    Route::get('/', 'OrderController@index');
+    Route::get('list', 'OrderController@list');
+    Route::post('sync', 'OrderController@sync');
+    Route::post('store', 'OrderController@store');
+    Route::get('send-email/{orderId}', 'OrderController@sendOrderEmail');
+  });
+
   Route::group(['prefix' => 'candidate'], function () {
     Route::get('/','CandidateController@index');
     Route::post('create', 'CandidateController@create');
