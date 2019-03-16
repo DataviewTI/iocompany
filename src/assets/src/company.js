@@ -6,298 +6,11 @@ function (self) {
        $('#order-modal').modal('show')
     });
     
-    $.ajax({
-        url: 'https://sandbox.moip.com.br/v2/orders',
-        method: 'GET',
-        headers: {
-            "Authorization": "Basic "+token,
-            "Content-Type": "application/json"
-        },
-        beforeSend: function(){
-        //   HoldOn.open({message:"Criando pagamento, aguarde...",theme:'sk-bounce'});
-        },
-        complete: (data) => {
-        },
-        success: (data) => {
-            $.ajax({
-                url: '/admin/orders/sync',
-                method: 'POST',
-                data: data,
-                beforeSend: function(){
-                //   HoldOn.open({message:"Criando pagamento, aguarde...",theme:'sk-bounce'});
-                },
-                complete: (data) => {
-                },
-                success: (data) => {
-                    self.ordersDt = $('#orders-table').DataTable({
-                        aaSorting:[[0,"desc"]],
-                        ajax: '/admin/orders/list',
-                        initComplete:function(settings, json){
-                        },
-                        footerCallback:function(row, data, start, end, display){
-                        },
-                        columns: [
-                          { data: 'id', name: 'id'},
-                          { data: 'company', name: 'company'},
-                          { data: 'company', name: 'company'},
-                          { data: 'company', name: 'company'},
-                          { data: 'plan', name: 'plan'},
-                          { data: 'wirecard_data', name: 'wirecard_data'},
-                          { data: 'wirecard_data', name: 'wirecard_data'},
-                          { data: 'wirecard_data', name: 'wirecard_data'},
-                          { data: "actions",  name: "actions" }
-                        ],
-                        columnDefs:
-                        [
-                            {
-                                targets: "__dt_cnpj",
-                                render: function (data, type, row, y) {
-                                    return data.cnpj
-                                }
-                            },
-                            {
-                                targets: "__dt_razao-social",
-                                render: function (data, type, row, y) {
-                                    return data.razaoSocial
-                                }
-                            },
-                            {
-                                targets: "__dt_email",
-                                render: function (data, type, row, y) {
-                                    return data.email
-                                }
-                            },
-                            {
-                                targets: "__dt_plano",
-                                render: function (data, type, row, y) {
-                                    return data.name
-                                }
-                            },
-                            {
-                                targets: "__dt_valor",
-                                render: function (data, type, row, y) {
-                                    var size = data.amount.total.length
-                                    return [data.amount.total.slice(0, size-2), '.', data.amount.total.slice(size-2)].join('')
-                                }
-                            }, 
-                            {
-                                targets: "__dt_status",
-                                render: function (data, type, row, y) {
-                                    if(data.status == 'PAID')
-                                        return 'Pago'
-                
-                                    if(data.status == 'REVERTED')
-                                        return 'Devolvido'
-                                    
-                                    return 'Aguardando pagamento'
-                                }
-                            },
-                            {
-                                targets: "__dt_dt-pagamento",
-                                render: function (data, type, row, y) {
-                                    if(data.status == 'PAID'){
-                                        let date;
-                                        data.events.forEach(event => {
-                                            if(event.type == 'PAYMENT.AUTHORIZED') {
-                                                date = event.createdAt
-                                            }
-                                        });
-
-                                        date = new Date(date)
-                                        return (date.getDate() < 10 ? ('0'+date.getDate()) : date.getDate())  + '/' 
-                                            + (date.getMonth() < 9 ? ('0'+(date.getMonth()+1)) : (date.getMonth()+1))  + '/' 
-                                            + date.getFullYear()
-                                    }
-                
-                                    return ''
-                                }
-                            },
-                            {targets:'__dt_acoes',width:"7%",className:"text-center",searchable:false,orderable:false,render:function(data,type,row,y){
-                                return self.ordersDt.addDTButtons({
-                                    buttons:[
-                                        {ico:'ico-mail',_class: 'text-success',title:'Reenviar email para pagamento'},
-                                        {ico:'ico-trash',_class:'text-danger',title:'Excluir'},
-                                    ]}); 
-                                }
-                            },
-                        ]	
-                    }).on('click','.ico-mail',function(){
-                        var data = self.ordersDt.row($(this).parents('tr')).data();
-
-                        $.ajax({
-                          url: '/admin/orders/send-email/'+data.id, 
-                          method: 'GET',
-                          beforeSend: function(){
-                               // HoldOn.open({message:"Enviando email, aguarde...",theme:'sk-bounce'});
-                          },
-                          success: function(data){
-                            HoldOn.close();
-                            if(data.success)
-                            {
-                              swal({
-                                title:"Um email para pagamento foi enviado para "+data.order.company.email,
-                                confirmButtonText:'OK',
-                                type:"success",
-                              });
-                            }else{
-                              swal({
-                                title:"Não foi possível enviar o email para pagamento. Verifique se o email cadastrado está correto",
-                                confirmButtonText:'OK',
-                                type:"error",
-                              });
-                            }
-                          },
-                          error:function(ret){
-                            self.defaults.ajax.onError(ret,self.callbacks.create.onError);
-                          }
-                        });//end ajax
-
-                    }).on('click','.ico-trash',function(){
-                        // var data = self.ordersDt.row($(this).parents('tr')).data();
-                        // self.delete(data.id);
-                    });
-
-                },
-                error: (err) => {
-                }
-            });
-        },
-        error: (err) => {
-        }
-    });
-
+    loadOrders()
     
-
     $('#create-order').click(function (e) {
         e.preventDefault();
-        let formData = $('#order-form').serializeArray()
-        console.log(formData);
-        let company;
-        let plan;
-        formData.forEach(element => {
-            if(element.name == 'company')
-                company = JSON.parse(element.value)
-
-            if(element.name == 'plan')
-                plan = JSON.parse(element.value)
-        });
-        console.log(company);
-        console.log(plan);
-
-        let customer = {  
-            "ownId" : company.cnpj, 
-            "fullname" : company.razaoSocial,
-            "email" : company.email,
-            "birthDate" : '2019-01-01',
-            "taxDocument" : {  
-                "type" : "CNPJ",
-                "number" : company.cnpj
-            },
-            "phone" : {  
-                "countryCode" : "55",
-                "areaCode" : "00",
-                "number" : company.phone
-            },
-            "shippingAddress" : {  
-                "city" : company.city_id,
-                "district" : company.address2,
-                "street" : company.address,
-                "streetNumber" : company.numberApto,
-                "zipCode" : company.zipCode,
-                "state" : "TO",
-                "country" : "BRA"
-            }
-        }
-
-        let order = {  
-            "ownId" : "645345634",
-            "amount" : {  
-                "currency" : "BRL",
-            },
-            "items" : [  
-                {  
-                    "product" : "Plano Palmjob :  "+plan.name,
-                    "category" : "BUSINESS_AND_INDUSTRIAL",
-                    "quantity" : 1,
-                    "detail" : plan.description,
-                    "price" : plan.amount.replace('.', '')
-                }
-            ],
-            "customer" : customer
-            
-        }
-
-        console.log(order);
-        console.log(token);
-
-        $.ajax({
-            url: 'https://sandbox.moip.com.br/v2/orders',
-            method: 'POST',
-            dataType: "json",
-            headers: {
-                "Authorization": "Basic "+token,
-                "Content-Type": "application/json"
-            },
-            data: JSON.stringify(order),
-            beforeSend: function(){
-                $('#order-modal').modal('hide')
-                //   HoldOn.open({message:"Criando pagamento, aguarde...",theme:'sk-bounce'});
-            },
-            complete: (data) => {
-                console.log('data ', data);
-                
-            },
-            success: (res) => {
-                let maxPortions = 1
-                let creditCard = false
-                let boleto = false
-                formData.forEach(element => {
-                    if(element.name == 'max_portions')
-                        maxPortions = element.value
-
-                    if(element.name == 'credit_card')
-                        creditCard = true
-               
-                    if(element.name == 'boleto')
-                        boleto = true
-                });
-
-                let data = {
-                    company: company,
-                    plan: plan,
-                    formData: formData,
-                    wirecardData: res
-                }
-                formData.push({
-                    'name' : 'wirecard_data',
-                    'value' : JSON.stringify(res) 
-                })
-
-                console.log('res', res);
-                console.log('data', data);
-                console.log('formData', formData);
-                
-                $.ajax({ 
-                    url: '/admin/orders/store',
-                    method: 'POST',
-                    data: formData,
-                    beforeSend: function(){
-                    //   HoldOn.open({message:"Criando pagamento, aguarde...",theme:'sk-bounce'});
-                    },
-                    complete: (data) => {
-                    },
-                    success: (data) => {
-                    },
-                    error: (err) => {
-                    }
-                });
-                console.log('data ', data);
-            },
-            error: (err) => {
-                console.log('data ', err);
-            }
-        });
-        
+        createOrder();
     });
 
     $('#active').attrchange(function (attrName) {
@@ -464,7 +177,6 @@ function (self) {
             }
 
         });
-
     }
 
     self.dt = $("#default-table").DataTable({
@@ -650,11 +362,8 @@ function (self) {
 
     self.fv = [fv1];
 
-
     self.wizardActions(function () {
-
         document.getElementById('cnpj').removeAttribute('disabled');
-
     });
 
     self.callbacks.view = view(self);
@@ -688,44 +397,339 @@ function (self) {
 
 });
 
+function loadOrders() {
+    $.ajax({
+        url: 'https://sandbox.moip.com.br/v2/orders',
+        method: 'GET',
+        headers: {
+            "Authorization": "Basic "+token,
+            "Content-Type": "application/json"
+        },
+        beforeSend: function(){
+        //   HoldOn.open({message:"Criando pagamento, aguarde...",theme:'sk-bounce'});
+        },
+        complete: (data) => {
+        },
+        success: (data) => {
+            $.ajax({
+                url: '/admin/orders/sync',
+                method: 'POST',
+                data: data,
+                beforeSend: function(){
+                //   HoldOn.open({message:"Criando pagamento, aguarde...",theme:'sk-bounce'});
+                },
+                complete: (data) => {
+                },
+                success: (data) => {
+                    self.ordersDt = $('#orders-table').DataTable({
+                        aaSorting:[[0,"desc"]],
+                        ajax: '/admin/orders/list',
+                        initComplete:function(settings, json){
+                        },
+                        footerCallback:function(row, data, start, end, display){
+                        },
+                        columns: [
+                          { data: 'id', name: 'id'},
+                          { data: 'company', name: 'company'},
+                          { data: 'company', name: 'company'},
+                          { data: 'company', name: 'company'},
+                          { data: 'plan', name: 'plan'},
+                          { data: 'wirecard_data', name: 'wirecard_data'},
+                          { data: 'wirecard_data', name: 'wirecard_data'},
+                          { data: 'wirecard_data', name: 'wirecard_data'},
+                          { data: "actions",  name: "actions" }
+                        ],
+                        columnDefs:
+                        [
+                            {
+                                targets: "__dt_cnpj",
+                                render: function (data, type, row, y) {
+                                    return data.cnpj
+                                }
+                            },
+                            {
+                                targets: "__dt_razao-social",
+                                render: function (data, type, row, y) {
+                                    return data.razaoSocial
+                                }
+                            },
+                            {
+                                targets: "__dt_email",
+                                render: function (data, type, row, y) {
+                                    return data.email
+                                }
+                            },
+                            {
+                                targets: "__dt_plano",
+                                render: function (data, type, row, y) {
+                                    return data.name
+                                }
+                            },
+                            {
+                                targets: "__dt_valor",
+                                render: function (data, type, row, y) {
+                                    var size = data.amount.total.length
+                                    return [data.amount.total.slice(0, size-2), '.', data.amount.total.slice(size-2)].join('')
+                                }
+                            }, 
+                            {
+                                targets: "__dt_status",
+                                render: function (data, type, row, y) {
+                                    if(data.status == 'PAID')
+                                        return 'Pago'
+                
+                                    if(data.status == 'REVERTED')
+                                        return 'Devolvido'
+                                    
+                                    return 'Aguardando pagamento'
+                                }
+                            },
+                            {
+                                targets: "__dt_dt-pagamento",
+                                render: function (data, type, row, y) {
+                                    if(data.status == 'PAID'){
+                                        let date;
+                                        data.events.forEach(event => {
+                                            if(event.type == 'PAYMENT.AUTHORIZED') {
+                                                date = event.createdAt
+                                            }
+                                        });
 
+                                        date = new Date(date)
+                                        return (date.getDate() < 10 ? ('0'+date.getDate()) : date.getDate())  + '/' 
+                                            + (date.getMonth() < 9 ? ('0'+(date.getMonth()+1)) : (date.getMonth()+1))  + '/' 
+                                            + date.getFullYear()
+                                    }
+                
+                                    return ''
+                                }
+                            },
+                            {
+                                targets:'__dt_acoes',width:"7%",className:"text-center",searchable:false,orderable:false,render:function(data,type,row,y){
+                                    if(row.wirecard_data.status != 'PAID') {
+                                        return self.ordersDt.addDTButtons({
+                                            buttons:[
+                                                {ico:'ico-mail',_class: 'text-success',title:'Reenviar email para pagamento'},
+                                                {ico:'ico-trash',_class:'text-danger',title:'Excluir'},
+                                            ]}); 
+                                    }
 
-function view(self) {
-return {
-    onSuccess: function (data) {
+                                    return ''
+                                }
+                            },
+                        ]	
+                    }).on('click','.ico-mail',function(){
+                        var data = self.ordersDt.row($(this).parents('tr')).data();
 
-        data.id = data.cnpj;
+                        $.ajax({
+                          url: '/admin/orders/send-email/'+data.id, 
+                          method: 'GET',
+                          beforeSend: function(){
+                               // HoldOn.open({message:"Enviando email, aguarde...",theme:'sk-bounce'});
+                          },
+                          success: function(data){
+                            HoldOn.close();
+                            if(data.success)
+                            {
+                              swal({
+                                title:"Um email para pagamento foi enviado para "+data.order.company.email,
+                                confirmButtonText:'OK',
+                                type:"success",
+                              });
+                            }else{
+                              swal({
+                                title:"Não foi possível enviar o email para pagamento. Verifique se o email cadastrado está correto",
+                                confirmButtonText:'OK',
+                                type:"error",
+                              });
+                            }
+                          },
+                          error:function(ret){
+                            self.defaults.ajax.onError(ret,self.callbacks.create.onError);
+                          }
+                        });//end ajax
 
-        $('#cnpj').val(data.cnpj);
-        document.getElementById('cnpj').setAttribute('disabled', 'true');
+                    }).on('click','.ico-trash',function(){
+                        // var data = self.ordersDt.row($(this).parents('tr')).data();
+                        // self.delete(data.id);
+                    });
 
-        $('#razaoSocial').val(data.razaoSocial);
-        $('#nomeFantasia').val(data.nomeFantasia);
-        $('#phone').val(data.phone);
-        $('#mobile').val(data.mobile);
-        $('#email').val(data.email);
-        $('#zipCode').val(data.zipCode);
-        $('#numberApto').val(data.numberApto);
+                },
+                error: (err) => {
+                }
+            });
+        },
+        error: (err) => {
+        }
+    });
+}
 
-        $("#active").aaToggle(data.active == 0 ? false : true);
-        $("#recruiter").aaToggle(function (data) {
-            let ret = false;
-            data.roles.forEach(function (item, index, array) {
-                if (item.name == 'recruiter')
-                    ret = true;
+function createOrder() {
+    let formData = $('#order-form').serializeArray()
+    console.log(formData);
+    let company;
+    let plan;
+    formData.forEach(element => {
+        if(element.name == 'company')
+            company = JSON.parse(element.value)
+
+        if(element.name == 'plan')
+            plan = JSON.parse(element.value)
+    });
+    console.log(company);
+    console.log(plan);
+
+    let customer = {  
+        "ownId" : company.cnpj, 
+        "fullname" : company.razaoSocial,
+        "email" : company.email,
+        "birthDate" : '2019-01-01',
+        "taxDocument" : {  
+            "type" : "CNPJ",
+            "number" : company.cnpj
+        },
+        "phone" : {  
+            "countryCode" : "55",
+            "areaCode" : "00",
+            "number" : company.phone
+        },
+        "shippingAddress" : {  
+            "city" : company.city_id,
+            "district" : company.address2,
+            "street" : company.address,
+            "streetNumber" : company.numberApto,
+            "zipCode" : company.zipCode,
+            "state" : "TO",
+            "country" : "BRA"
+        }
+    }
+
+    let order = {  
+        "ownId" : "645345634",
+        "amount" : {  
+            "currency" : "BRL",
+        },
+        "items" : [  
+            {  
+                "product" : "Plano Palmjob :  "+plan.name,
+                "category" : "BUSINESS_AND_INDUSTRIAL",
+                "quantity" : 1,
+                "detail" : plan.description,
+                "price" : plan.amount.replace('.', '')
+            }
+        ],
+        "customer" : customer
+        
+    }
+
+    console.log(order);
+    console.log(token);
+
+    $.ajax({
+        url: 'https://sandbox.moip.com.br/v2/orders',
+        method: 'POST',
+        dataType: "json",
+        headers: {
+            "Authorization": "Basic "+token,
+            "Content-Type": "application/json"
+        },
+        data: JSON.stringify(order),
+        beforeSend: function(){
+            $('#order-modal').modal('hide')
+            //   HoldOn.open({message:"Criando pagamento, aguarde...",theme:'sk-bounce'});
+        },
+        complete: (data) => {
+            console.log('data ', data);
+            
+        },
+        success: (res) => {
+            let maxPortions = 1
+            let creditCard = false
+            let boleto = false
+            formData.forEach(element => {
+                if(element.name == 'max_portions')
+                    maxPortions = element.value
+
+                if(element.name == 'credit_card')
+                    creditCard = true
+           
+                if(element.name == 'boleto')
+                    boleto = true
             });
 
-            return ret;
-        }(data));
+            let data = {
+                company: company,
+                plan: plan,
+                formData: formData,
+                wirecardData: res
+            }
+            formData.push({
+                'name' : 'wirecard_data',
+                'value' : JSON.stringify(res) 
+            })
 
-        self.fv[0].validate();
-
-        //não disparar o preenchimento quando for update logo após o view
-    }, //sasas
-    onError: function (self) {
-        console.error(self);
-    }
+            console.log('res', res);
+            console.log('data', data);
+            console.log('formData', formData);
+            
+            $.ajax({ 
+                url: '/admin/orders/store',
+                method: 'POST',
+                data: formData,
+                beforeSend: function(){
+                //   HoldOn.open({message:"Criando pagamento, aguarde...",theme:'sk-bounce'});
+                },
+                complete: (data) => {
+                },
+                success: (data) => {
+                },
+                error: (err) => {
+                }
+            });
+            console.log('data ', data);
+        },
+        error: (err) => {
+            console.log('data ', err);
+        }
+    });
 }
+
+function view(self) {
+    return {
+        onSuccess: function (data) {
+
+            data.id = data.cnpj;
+
+            $('#cnpj').val(data.cnpj);
+            document.getElementById('cnpj').setAttribute('disabled', 'true');
+
+            $('#razaoSocial').val(data.razaoSocial);
+            $('#nomeFantasia').val(data.nomeFantasia);
+            $('#phone').val(data.phone);
+            $('#mobile').val(data.mobile);
+            $('#email').val(data.email);
+            $('#zipCode').val(data.zipCode);
+            $('#numberApto').val(data.numberApto);
+
+            $("#active").aaToggle(data.active == 0 ? false : true);
+            $("#recruiter").aaToggle(function (data) {
+                let ret = false;
+                data.roles.forEach(function (item, index, array) {
+                    if (item.name == 'recruiter')
+                        ret = true;
+                });
+
+                return ret;
+            }(data));
+
+            self.fv[0].validate();
+
+            //não disparar o preenchimento quando for update logo após o view
+        }, //sasas
+        onError: function (self) {
+            console.error(self);
+        }
+    }
 }
 
 

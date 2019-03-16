@@ -18,6 +18,7 @@ class Order extends Model implements AuditableContract
         'plan_id',
         'max_portions',
         'wirecard_data',
+        'payment_method',
     ];
 
     protected $casts = [

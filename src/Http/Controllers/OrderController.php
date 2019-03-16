@@ -60,10 +60,17 @@ class OrderController extends IOController
         return response()->json(['success'=>true]);
     }
 
-    public function sendOrderEmail($orderId) {
-        $order = Order::where('id', $orderId)->with('company')->first();
-        Mail::to($order->company->email)->send(new NewOrderPlaced($order->toArray()));
-        return response()->json(['success'=>true, 'order' => $order]);
+    public function sendOrderEmail($order) {
+        $data = [
+            'payment_method' => $order['payment_method'],
+            'wirecardData' => json_decode($order->wirecard_data, true)
+        ];
+        try {
+            Mail::to($order->company->email)->send(new NewOrderPlaced($data));
+        } catch (\Exception $ex) {
+            return ['success' => false, 'error' => $ex->getMessage()];
+        }
+        return ['success'=>true];
     }
 
     /**
@@ -74,21 +81,32 @@ class OrderController extends IOController
      */
     public function store(Request $request)
     {
-        dump($request->wirecard_data);
+        // dump($request->all());
 
-        $order = new Order([
+        $order = [
             'company_cnpj' => json_decode($request->company)->cnpj,
             'plan_id' => json_decode($request->plan)->id,
             'max_portions' => $request->max_portions,
             'wirecard_data' => $request->wirecard_data
-        ]);
+        ];
+
+        if ($request->has(['credit_card', 'boleto'])) {
+            $order['payment_method'] = null;
+        } elseif ($request->has('credit_card')) {
+            $order['payment_method'] = 'CREDIT_CARD';
+        } elseif ($request->has('boleto')) {
+            $order['payment_method'] = 'BOLETO';
+        }
+
+        $order = new Order($order);
 
         if($order->save()) {
-            $this->sendOrderEmail($order->id);
+            $this->sendOrderEmail($order);
         }
+
         dump($order);
 
-        // return response()->json(['success'=>$customer]);
+        // return response()->json(['success'=>$order]);
     }
 
     /**

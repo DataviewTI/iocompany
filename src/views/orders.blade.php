@@ -83,9 +83,9 @@
                                 </label>
                             </div>
                         </div>
-                        <div class="form-group col-6">
+                        <div class="form-group col-6 d-none">
                             <label for="exampleInputEmail1">Número máximo de parcelas</label>
-                            <select class="custom-select" name="max_portions" id="max_portions">
+                            <select class="custom-select" type="hidden" name="max_portions" id="max_portions">
                                 <option value="1">1</option>
                                 <option value="2">2</option>
                                 <option value="3">3</option>
