@@ -8,6 +8,7 @@
       "_steps"=> [
             ["name" => "Dados pessoais", "view"=> "Candidate::form-general"],
             ["name" => "Experiência profissional", "view"=> "Candidate::form-experience"],
+            ["name" => "Questionário", "view"=> "Candidate::form-answers"],
         ]
     ])
     @endcomponent

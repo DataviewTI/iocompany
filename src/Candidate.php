@@ -34,6 +34,11 @@ class Candidate extends Model
     'remember_token',
   ];
 
+  public function answers()
+  {
+    return $this->hasMany('Dataview\IOCompany\Answer', 'candidate_cpf', 'cpf');
+  }
+
   public function graduations()
   {
     return $this->hasMany('Dataview\IOCompany\Graduation');

@@ -8,6 +8,7 @@ use Illuminate\Http\Response;
 use App\Http\Requests;
 use Illuminate\Http\Request;
 use Dataview\IntranetOne\Group;
+use Dataview\IOCompany\Attribute;
 use Dataview\IOCompany\CandidateRequest;
 use Dataview\IOCompany\Candidate;
 use Dataview\IOCompany\Graduation;
@@ -20,6 +21,9 @@ use Validator;
 use DataTables;
 use Session;
 use Sentinel;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use \App\Mail\NewCandidateCreated;
 
 class CandidateController extends IOController{
 
@@ -43,12 +47,16 @@ class CandidateController extends IOController{
   }
 
 	public function create(CandidateRequest $request){
+    dump($request->all());
     $check = $this->__create($request);
     if(!$check['status'])
       return response()->json(['errors' => $check['errors'] ], $check['code']);	
 
     $obj = new Candidate($request->all());
+    $password = str_random(8);
+    $obj->password = Hash::make($password);
     $obj->save();
+    // Mail::to($obj->email)->send(new NewCandidateCreated(['cpf' => $request->cpf, 'password' => $password]));
 
     if($request->__graduations != null){
       $graduations = json_decode($request->__graduations);
@@ -101,9 +109,24 @@ class CandidateController extends IOController{
         PcdType::find($request->pcd)
       );
     } 
+
+    $attributes = Attribute::all();
+
+    foreach ($attributes as $attribute) {
+      $obj->answers()->create([
+        'attribute_id' => $attribute->id,
+        'value' => $request->{$attribute->id},
+      ]);
+    }
+
     $obj->save();
 
-    return response()->json(['success'=>true,'data'=>null]);
+
+
+    dump($obj);
+    dump($obj->answers);
+
+    // return response()->json(['success'=>true,'data'=>null]);
 	}
 
   public function view($id){

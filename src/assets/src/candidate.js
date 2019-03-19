@@ -506,7 +506,24 @@ new IOService({
         },
       }).setLocale('pt_BR', FormValidation.locales.pt_BR);
 
-    self.fv = [fv1, fv2];
+      let fv3 = FormValidation.formValidation(
+        form.querySelector('.step-pane[data-step="3"]'), {
+          fields: {
+          },
+          plugins: {
+            trigger: new FormValidation.plugins.Trigger(),
+            submitButton: new FormValidation.plugins.SubmitButton(),
+            bootstrap: new FormValidation.plugins.Bootstrap(),
+            icon: new FormValidation.plugins.Icon({
+              valid: 'fv-ico ico-check',
+              invalid: 'fv-ico ico-close',
+              validating: 'fv-ico ico-gear ico-spin'
+            }),
+          },
+        }).setLocale('pt_BR', FormValidation.locales.pt_BR);
+  
+
+    self.fv = [fv1, fv2, fv3];
 
     self.graduations_dt = $('#__graduations_dt').DataTable({
         "paging": false,
