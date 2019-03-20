@@ -37,5 +37,6 @@ Route::group(['prefix' => 'admin', 'middleware' => ['web','admin'], 'as' => 'adm
     Route::get('view/{id}', 'JobController@view');
     Route::post('update/{id}', 'JobController@update');
     Route::get('delete/{id}', 'JobController@delete');			
+    Route::get('{id}/candidates', 'JobController@getCompatibleCandidates');			
   });  
 });

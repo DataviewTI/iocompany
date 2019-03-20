@@ -11,6 +11,7 @@ use Dataview\IOCompany\JobRequest;
 use Dataview\IOCompany\Company;
 use Dataview\IOCompany\PcdType;
 use Dataview\IOCompany\Job;
+use Dataview\IOCompany\Candidate;
 use Dataview\IOCompany\Salary;
 use Dataview\IOCompany\Degree;
 use Dataview\IOCompany\CBOOccupation;
@@ -19,6 +20,7 @@ use Validator;
 use DataTables;
 use Session;
 use Sentinel;
+use Illuminate\Support\Arr;
 
 class JobController extends IOController{
 
@@ -182,5 +184,70 @@ class JobController extends IOController{
     $obj = $obj->delete();
     return  json_encode(['sts'=>$obj]);
   }
+
+  public function getCompatibleCandidates($jobId){
+    $job = Job::where('id', $jobId)->with('features')->first();
+    $job->characterSetPoints = $job->getCharacterSetsPoints();
+    // dump($job);
+    $candidates = Candidate::whereHas('answers')->get();
+    foreach ($candidates as $candidate) {
+      $candidate->characterSetPoints = $candidate->getCharacterSetsPoints();
+    }
+
+    $res = [];
+
+    // dump($this->calculatePercentage($job->characterSetPoints));
+    // dump($this->calculatePercentage($candidates[0]->characterSetPoints));
+    // dump($this->sameOrder($job->characterSetPoints, $candidates[0]->characterSetPoints));
+    foreach ($candidates as $candidate) {
+      if($this->sameOrder($job->characterSetPoints, $candidate->characterSetPoints))
+        array_push($res, $candidate);
+    }
+
+    dump($res);
+  }
+
+  public function calculatePercentage($points) {
+    $total = 0;
+    foreach ($points as $point) {
+      $total += $point;
+    }
+
+    $res = [];
+    foreach ($points as $key => $value) {
+      $res[$key] = (($value / $total) * 100);
+    }
+
+    return $res;
+  }
+
+  public function sameOrder($a, $b) {
+    $keysA = [];
+    $keysB = [];
+    foreach ($a as $key => $value) {
+      array_push($keysA, $key);
+    }
+
+    foreach ($b as $key => $value) {
+      array_push($keysB, $key);
+    }
+
+    for ($i=0; $i < count($keysA); $i++) { 
+      if($keysA[$i] != $keysB[$i])
+        return false;
+    }
+
+    return true;
+  }
+
+  // public function orderByPoints($results) {
+  //   $bigger = 0;
+  //   $res
+  //   foreach ($results as $result) {
+  //     $sorted = array_values(Arr::sort($array, function ($value) {
+  //       return $value['name'];
+  //     }));
+  //   }
+  // }
 
 }

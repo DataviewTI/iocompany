@@ -20,8 +20,4 @@ class Answer extends Model
     public function attribute() {
         return $this->belongsTo('Dataview\IOCompany\Attribute');
     }
-
-    public function characterSet() {
-        return $this->belongsTo('Dataview\IOCompany\CharacterSet');
-    }
 }

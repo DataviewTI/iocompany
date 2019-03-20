@@ -16,4 +16,8 @@ class Feature extends Model
     return $this->belongsToMany('Dataview\IOCompany\Job', 'feature_job');
   }
 
+  public function characterSet() {
+    return $this->belongsToMany('Dataview\IOCompany\CharacterSet');
+  }
+
 }

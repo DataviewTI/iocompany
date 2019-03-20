@@ -11,4 +11,8 @@ class Attribute extends Model
         'description',
         'slug',
     ];
+
+    public function characterSet() {
+        return $this->belongsTo('Dataview\IOCompany\CharacterSet');
+    }
 }

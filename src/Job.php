@@ -16,6 +16,26 @@ class Job extends IOModel
     'hirer_info' => 'array'
   ];
 
+  public function getCharacterSetsPoints(){
+    $characterSets = CharacterSet::all();
+    $features = $this->features;
+
+    $res = [];
+    foreach ($characterSets as $characterSet) {
+      $res[$characterSet->id] = 0;
+    }
+
+    foreach ($features as $feature) {
+      $featureCharacterSets = $feature->characterSet;
+      foreach ($featureCharacterSets as $featureCharacterSet) {
+        $res[$featureCharacterSet->id]++;
+      }
+    }
+    
+    arsort($res);
+    return $res;
+  }
+
   public function group(){
     return $this->belongsTo('Dataview\IntranetOne\Group');
   }
