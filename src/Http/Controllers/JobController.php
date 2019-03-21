@@ -205,6 +205,7 @@ class JobController extends IOController{
     }
 
     dump($res);
+    // return view('company.candidates', ['candidates' => $candidates]);
   }
 
   public function calculatePercentage($points) {
