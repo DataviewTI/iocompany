@@ -110,11 +110,13 @@ class CandidateController extends IOController{
       );
     } 
 
-    $attributes = Attribute::all();
+    $attributes = Attribute::with('characterSet')->get();
 
+    $attrs = [];
     foreach ($attributes as $attribute) {
-      $obj->answers()->create([
+      array_push($attrs, [
         'attribute_id' => $attribute->id,
+        'character_set_id' => $attribute->characterSet->id,
         'value' => $request->{$attribute->id},
       ]);
     }

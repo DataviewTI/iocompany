@@ -186,26 +186,27 @@ class JobController extends IOController{
   }
 
   public function getCompatibleCandidates($jobId){
-    $job = Job::where('id', $jobId)->with('features')->first();
-    $job->characterSetPoints = $job->getCharacterSetsPoints();
-    // dump($job);
-    $candidates = Candidate::whereHas('answers')->get();
-    foreach ($candidates as $candidate) {
-      $candidate->characterSetPoints = $candidate->getCharacterSetsPoints();
-    }
+    dump($jobId);
+      $job = Job::where('id', $jobId)->with(['features', 'cboOccupation'])->first();
+      $characterSets = CharacterSet::all();
+      $job->characterSetPoints = $job->getCharacterSetsPoints();
+      // dump($job);
+      $candidates = Candidate::whereHas('answers')->with('city')->get();
+      foreach ($candidates as $candidate) {
+          $candidate->characterSetPoints = $candidate->getCharacterSetsPoints();
+          $candidate->characterSetPercentages = $this->calculatePercentage($candidate->characterSetPoints);
+      }
 
-    $res = [];
+      $res = [];
 
-    // dump($this->calculatePercentage($job->characterSetPoints));
-    // dump($this->calculatePercentage($candidates[0]->characterSetPoints));
-    // dump($this->sameOrder($job->characterSetPoints, $candidates[0]->characterSetPoints));
-    foreach ($candidates as $candidate) {
-      if($this->sameOrder($job->characterSetPoints, $candidate->characterSetPoints))
-        array_push($res, $candidate);
-    }
+      foreach ($candidates as $candidate) {
+          if($this->sameOrder($job->characterSetPoints, $candidate->characterSetPoints))
+              array_push($res, $candidate);
+              // break;
+      }
 
-    dump($res);
-    // return view('company.candidates', ['candidates' => $candidates]);
+      dump($res);
+      // return view('company.candidates', ['job' => $job, 'candidates' => $res, 'characterSets' => $characterSets, 'active' => true]);
   }
 
   public function calculatePercentage($points) {

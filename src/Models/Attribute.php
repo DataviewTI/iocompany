@@ -13,6 +13,6 @@ class Attribute extends Model
     ];
 
     public function characterSet() {
-        return $this->belongsTo('Dataview\IOCompany\CharacterSet');
+        return $this->belongsTo('Dataview\IOCompany\CharacterSet', 'character_set_id');
     }
 }

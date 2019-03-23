@@ -26,7 +26,7 @@ class CreateCandidatesTable extends Migration
             $table->text('address_street');
             $table->text('address_number');
             $table->text('address_district');
-            $table->text('address_city');
+            $table->string('address_city');
             $table->text('address_state');
             $table->char('phone', 15);
             $table->char('mobile', 15);
@@ -46,6 +46,7 @@ class CreateCandidatesTable extends Migration
             $table->foreign('salary_id')->references('id')->on('salaries');
             $table->foreign('children_amount_id')->references('id')->on('children_amounts');
             $table->foreign('group_id')->references('id')->on('groups');
+            $table->foreign('address_city')->references('id')->on('cities');
 
             $table->timestamps();
             $table->softDeletes();

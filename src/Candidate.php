@@ -3,7 +3,6 @@
 namespace Dataview\IOCompany;
 
 use Illuminate\Database\Eloquent\Model;
-use Dataview\IOCompany\CharacterSet;
 use Dataview\IOCompany\Graduation;
 use Dataview\IOCompany\GraduationType;
 use Dataview\IOCompany\JobExperience;
@@ -35,25 +34,23 @@ class Candidate extends Model
     'remember_token',
   ];
 
-  public function getCharacterSetsPoints(){
-    $characterSets = CharacterSet::all();
-    $answers = $this->answers()->with('attribute.characterSet')->take(100)->get();
+  public function getCharacterSetsPoints($characterSets, $attributes){
+    $answers = json_decode($this->answers);
+
     $res = [];
     foreach ($characterSets as $characterSet) {
       $res[$characterSet->id] = 0;
     }
 
     foreach ($answers as $answer) {
-      $chs = $answer->attribute->characterSet;
-      $res[$chs->id] += $answer->value;
+      $res[$answer->character_set_id] += $answer->value;
     }
     arsort($res);
     return $res;
   }
 
-  public function answers()
-  {
-    return $this->hasMany('Dataview\IOCompany\Answer', 'candidate_cpf', 'cpf');
+  public function city(){
+    return $this->belongsTo('Dataview\IOCompany\City', 'address_city');
   }
 
   public function graduations()
