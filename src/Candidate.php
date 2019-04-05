@@ -49,6 +49,11 @@ class Candidate extends Model
     return $res;
   }
 
+  public function palmjobNotifications()
+  {
+    return $this->hasMany('Dataview\IOCompany\PalmjobNotification', 'candidate_cpf', 'cpf');
+  }
+
   public function city(){
     return $this->belongsTo('Dataview\IOCompany\City', 'address_city');
   }

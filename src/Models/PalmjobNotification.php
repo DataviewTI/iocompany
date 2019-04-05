@@ -4,8 +4,10 @@ namespace Dataview\IOCompany;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Notification extends Model
+class PalmjobNotification extends Model
 {
+    protected $table = 'notifications';
+
     protected $fillable = [
         'candidate_cpf',
         'job_id',
