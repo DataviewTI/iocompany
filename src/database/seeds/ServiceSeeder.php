@@ -91,5 +91,8 @@ class ServiceSeeder extends Seeder
       $this->call(PcdTypeSeeder::class);
       $this->call(ResignationReasonSeeder::class);
       $this->call(MaritalStatusTypeSeeder::class);
+      $this->call(CharacterSetSeeder::class);
+      $this->call(CharacterSetFeatureSeeder::class);
+      $this->call(AttributeSeeder::class);
     }
   } 
