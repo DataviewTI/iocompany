@@ -48,6 +48,9 @@ class CandidateController extends IOController{
 
 	public function create(CandidateRequest $request){
     // dump($request->all());
+    if(Candidate::where('cpf', $request->cpf)->first())
+      return response()->json(['message' => 'Este CPF já está cadastrado!'], 500);
+      
     $check = $this->__create($request);
     if(!$check['status'])
       return response()->json(['errors' => $check['errors'] ], $check['code']);	

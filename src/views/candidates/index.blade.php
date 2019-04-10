@@ -14,7 +14,7 @@
 			@component('IntranetOne::io.components.nav-tabs',
 			[
 				"_id" => "vj-default-tablist",
-				"_active"=>1,
+				"_active"=>0,
 				"_tabs"=> [
 					[
 						"tab"=>"Listar",

@@ -72,6 +72,7 @@ function IOCompany(params = {}) {
             IO.src.js + 'extensions/ext-jquery.mask.js',
             $.dep.moment + 'moment.js',
             $.dep.service + 'candidate.js',
+            IO.dep.io.toastr + 'toastr.min.js',
         ], IO.dest.io.root + 'services/io-candidates.min.js');
 
 
