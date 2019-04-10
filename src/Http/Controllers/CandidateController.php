@@ -47,7 +47,7 @@ class CandidateController extends IOController{
   }
 
 	public function create(CandidateRequest $request){
-    dump($request->all());
+    // dump($request->all());
     $check = $this->__create($request);
     if(!$check['status'])
       return response()->json(['errors' => $check['errors'] ], $check['code']);	
@@ -123,12 +123,10 @@ class CandidateController extends IOController{
 
     $obj->save();
 
+    // dump($obj);
+    // dump($obj->answers);
 
-
-    dump($obj);
-    dump($obj->answers);
-
-    // return response()->json(['success'=>true,'data'=>null]);
+    return response()->json(['success'=>true,'data'=>null]);
 	}
 
   public function view($id){

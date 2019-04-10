@@ -32,6 +32,7 @@ class Candidate extends Model
     'password',
     'last_login',
     'remember_token',
+    'answers'
   ];
 
   public function getCharacterSetsPoints($characterSets, $attributes){
