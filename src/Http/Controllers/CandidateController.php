@@ -124,10 +124,11 @@ class CandidateController extends IOController{
       ]);
     }
 
+    $obj->answers = json_encode($attrs);
     $obj->save();
 
-    // dump($obj);
-    // dump($obj->answers);
+    // // dump($obj);
+    // // dump($obj->answers);
 
     return response()->json(['success'=>true,'data'=>null]);
 	}

@@ -987,6 +987,18 @@ function view(self) {
         })
       })
 
+      var answers = JSON.parse(data.answers)
+      console.log(answers);
+
+      answers.forEach(function (item) {
+        console.log(item);
+        console.log($('#answers_container select#'+item.attribute_id));
+        
+        
+        $('#answers_container select#'+item.attribute_id).val(item.value)
+      })
+      
+
     },
     onError: function (self) {
       console.error(self);

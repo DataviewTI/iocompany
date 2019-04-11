@@ -104,9 +104,9 @@ class OrderController extends IOController
             $this->sendOrderEmail($order);
         }
 
-        dump($order);
+        // dump($order);
 
-        // return response()->json(['success'=>$order]);
+        return response()->json(['success'=>$order]);
     }
 
     /**

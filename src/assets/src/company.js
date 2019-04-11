@@ -622,9 +622,6 @@ function createOrder() {
         
     }
 
-    console.log(order);
-    console.log(token);
-
     $.ajax({
         url: 'https://sandbox.moip.com.br/v2/orders',
         method: 'POST',
@@ -636,11 +633,9 @@ function createOrder() {
         data: JSON.stringify(order),
         beforeSend: function(){
             $('#order-modal').modal('hide')
-            //   HoldOn.open({message:"Criando pagamento, aguarde...",theme:'sk-bounce'});
+              HoldOn.open({message:"Criando pagamento, aguarde...",theme:'sk-bounce'});
         },
         complete: (data) => {
-            console.log('data ', data);
-            
         },
         success: (res) => {
             let maxPortions = 1
@@ -668,10 +663,6 @@ function createOrder() {
                 'value' : JSON.stringify(res) 
             })
 
-            console.log('res', res);
-            console.log('data', data);
-            console.log('formData', formData);
-            
             $.ajax({ 
                 url: '/admin/orders/store',
                 method: 'POST',
@@ -682,6 +673,13 @@ function createOrder() {
                 complete: (data) => {
                 },
                 success: (data) => {
+                    HoldOn.close()
+                    swal({
+                        title:"Pagamento criado com sucesso!",
+                        title:"O cliente receberá um email com o link para prosseguir com o pagamento",
+                        confirmButtonText:'OK',
+                        type:"success",
+                      });
                 },
                 error: (err) => {
                 }

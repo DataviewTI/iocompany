@@ -5,7 +5,7 @@
 @endphp
 
 <div class = 'row'>
-  <div class="col-md col-sm-12 pl-1" id = 'graduation_container' style = 'border-right:1px #e1f0ee solid'>
+  <div class="col-md col-sm-12 pl-1" id = 'answers_container' style = 'border-right:1px #e1f0ee solid'>
     <h4>
       Pondere as palavras Abaixo de Acordo com a seguinte pergunta: o que tem a ver com você?
     </h4>
