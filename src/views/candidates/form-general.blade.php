@@ -50,7 +50,7 @@
         <input class="form-check-input " type="radio" name="gender" value="Feminino">
         <label class="form-check-label bmd-label-floating __required" for="feminino">Feminino</label>
       </div>
-      <div class="form-check form-check-inline mr-0">
+      <div class="form-check form-check-inline mr-0 d-none">
         <input class="form-check-input " type="radio" name="gender" id="outros" value="Outros">
         <label class="form-check-label bmd-label-floating __required" for="outros">Outro</label>
         <input type="text" class="form-control form-control-lg ml-3 p-0 w-100" id="other_gender" name = 'other_gender'>
