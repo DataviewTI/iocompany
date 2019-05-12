@@ -12,6 +12,7 @@ use Dataview\IOCompany\ResignationReason;
 class Candidate extends Model
 {
   protected $fillable = [
+    'id',
     'name',
     'social_name',
     'gender',
@@ -32,7 +33,14 @@ class Candidate extends Model
     'password',
     'last_login',
     'remember_token',
-    'answers'
+    'answers',
+    'marital_status_type_id',
+    'group_id',
+    'degre_id',
+    'pcd_type_id',
+    'pcd_group_id',
+    'salary_id',
+    'children_amount_id',
   ];
 
   public function getCharacterSetsPoints($characterSets, $attributes){
