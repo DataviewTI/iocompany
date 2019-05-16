@@ -8,8 +8,9 @@ use Dataview\IOCompany\GraduationType;
 use Dataview\IOCompany\JobExperience;
 use Dataview\IOCompany\JobDuration;
 use Dataview\IOCompany\ResignationReason;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class Candidate extends Model
+class Candidate extends Authenticatable
 {
   protected $fillable = [
     'id',
