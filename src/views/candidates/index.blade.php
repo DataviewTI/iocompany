@@ -32,6 +32,10 @@
 	<!-- content -->
   @stop
 
+  	<div class="modal modal-details" tabindex="-1" role="dialog">
+		
+	</div>
+
   @section('after_body_scripts')
   @endsection
 

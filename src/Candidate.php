@@ -51,7 +51,6 @@ class Candidate extends Authenticatable
     foreach ($characterSets as $characterSet) {
       $res[$characterSet->id] = 0;
     }
-
     foreach ($answers as $answer) {
       $res[$answer->character_set_id] += $answer->value;
     }

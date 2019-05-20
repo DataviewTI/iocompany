@@ -24,6 +24,7 @@ use Sentinel;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use \App\Mail\NewCandidateCreated;
+use Dataview\IOCompany\CharacterSet;
 
 class CandidateController extends IOController{
 
@@ -36,14 +37,26 @@ class CandidateController extends IOController{
 	}
 	
   public function list(){
-		$query = Candidate::select('id','name', 'gender','birthday','cpf','apprentice','address_city')
-    ->with('pcdType')
-    ->with('maritalStatus')
-    ->with('salary')
-    ->with('childrenAmount')
-    ->get();
+    $characterSets = CharacterSet::all();
+    $attributes = Attribute::with('characterSet')->get();
 
-    return Datatables::of(collect($query))->make(true);
+    $candidates = Candidate::with([
+      'pcdType',
+      'maritalStatus',
+      'salary',
+      'childrenAmount', 
+      'degree', 
+      'graduations.graduationType',
+      'jobExperiences.jobDuration',
+    ])->get();
+
+    foreach ($candidates as $candidate) {
+      $candidate->characterSetPoints = $candidate->getCharacterSetsPoints($characterSets, $attributes);
+      $candidate->characterSetPercentages = $this->calculatePercentage($candidate->characterSetPoints);
+      $candidate->characterSets = $characterSets;
+    }
+
+    return Datatables::of(collect($candidates))->make(true);
   }
 
 	public function create(CandidateRequest $request){
@@ -225,6 +238,20 @@ class CandidateController extends IOController{
     $obj = Candidate::find($id);
     $obj = $obj->delete();
     return  json_encode(['sts'=>$obj]);
+  }
+
+  public function calculatePercentage($points) {
+    $total = 0;
+    foreach ($points as $point) {
+      $total += $point;
+    }
+
+    $res = [];
+    foreach ($points as $key => $value) {
+      $res[$key] = (($value / $total) * 100);
+    }
+
+    return $res;
   }
 
 }
