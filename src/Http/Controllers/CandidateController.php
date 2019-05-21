@@ -48,13 +48,15 @@ class CandidateController extends IOController{
       'degree', 
       'graduations.graduationType',
       'jobExperiences.jobDuration',
+      'city'
     ])->get();
 
     foreach ($candidates as $candidate) {
       $candidate->characterSetPoints = $candidate->getCharacterSetsPoints($characterSets, $attributes);
       $candidate->characterSetPercentages = $this->calculatePercentage($candidate->characterSetPoints);
-      $candidate->characterSets = $characterSets;
+      $candidate->characterSets = $characterSets->toArray();
     }
+
 
     return Datatables::of(collect($candidates))->make(true);
   }

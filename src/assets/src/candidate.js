@@ -1057,84 +1057,84 @@ function setCEP(data, self) {
 }
 
 function preview(data) {
-  // console.log(data);
+  console.log(data);
 
-  // let teste = [];
+  let teste = [];
 
-  // console.log(Object.entries(data.characterSetPercentages).map((value, index) => {
-  //   return `<p>
-  //     <span style="color: #FC062D; font-weight: bold">${Number(parseFloat(value[1].replace(',', '.')).toFixed(2))} % </span>
-  //     ${Array.from(data.characterSets).filter((val, id) => {
-  //       return id == index
-  //     })[0].title}
-  //   </p>`
-  // }).toString().replace('/,/g', ''));
+  console.log(Object.entries(data.characterSetPercentages).map((value, index) => {
+    return `<p>
+      <span style="color: #FC062D; font-weight: bold">${Number(parseFloat(value[1].replace(',', '.')).toFixed(2))} % </span>
+      ${Array.from(data.characterSets).filter((val, id) => {
+        return id == index
+      })[0].title}
+    </p>`
+  }).toString().replace(/,/g, ''));
   
 
-  // let html = `
-  //   <div class="modal-dialog" role="document">
-  //     <div class="modal-content">
-  //       <div class="modal-header">
-  //         <h5 class="modal-title">${data.name}</h5>
-  //         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-  //         <span aria-hidden="true">&times;</span>
-  //         </button>
-  //       </div>
-  //       <div class="modal-body">
-  //         <p>
-  //           <i class="fas fa-envelope" style="color: #FC062D;"></i>
-  //           ${data.email}
-  //         </p>
-  //         <p>
-  //           <i class="fas fa-phone" style="color: #FC062D;"></i>
-  //           ${data.phone}
-  //         </p>
-  //         <p>
-  //           <i class="fas fa-map-marker" style="color: #FC062D;"></i>
-  //           ${data.city} - ${data.address_state}
-  //         </p>
-  //         <h5 style="font-weight: bold;">Perfil</h5>
-  //         ${Object.entries(data.characterSetPercentages).map((value, index) => {
-  //           return `<p>
-  //             <span style="color: #FC062D; font-weight: bold">${Number(parseFloat(value[1].replace(',', '.')).toFixed(2))} % </span>
-  //             ${Array.from(data.characterSets).filter((val, id) => {
-  //               return id == index
-  //             })[0].title}
-  //           </p>`
-  //         })}
-  //         <h5 style="font-weight: bold;">
-  //           <i class="fas fa-graduation-cap" style="color: #FC062D;"></i>
-  //           Formação acadêmica
-  //         </h5>
-  //         <p>
-  //           ${data.degree.degree}
-  //         </p>
-  //         <ul>
-  //           ${data.graduations.map((value, index) => {
-  //             return `<li>${value.graduation_type.title} em ${value.school}, ${value.ending}, ${value.institution}</li>`
-  //           })}
-  //         </ul>
+  let html = `
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">${data.name}</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>
+            <i class="fas fa-envelope" style="color: #FC062D;"></i>
+            ${data.email}
+          </p>
+          <p>
+            <i class="fas fa-phone" style="color: #FC062D;"></i>
+            ${data.phone}
+          </p>
+          <p>
+            <i class="fas fa-map-marker" style="color: #FC062D;"></i>
+            ${data.city.city} - ${data.address_state}
+          </p>
+          <h5 style="font-weight: bold;">Perfil</h5>
+          ${Object.entries(data.characterSetPercentages).map((value, index) => {
+            return `<p>
+              <span style="color: #FC062D; font-weight: bold">${Number(parseFloat(value[1].replace(',', '.')).toFixed(2))} % </span>
+              ${Array.from(data.characterSets).filter((val, id) => {
+                return id == index
+              })[0].title}
+            </p>`
+          }).toString().replace(/,/g, '')}
+          <h5 style="font-weight: bold;">
+            <i class="fas fa-graduation-cap" style="color: #FC062D;"></i>
+            Formação acadêmica
+          </h5>
+          <p>
+            ${data.degree.degree}
+          </p>
+          <ul>
+            ${data.graduations.map((value, index) => {
+              return `<li>${value.graduation_type.title} em ${value.school}, ${value.ending}, ${value.institution}</li>`
+            })}
+          </ul>
 
-  //         <h5 style="font-weight: bold; margin-top: 20px;">
-  //           <i class="fas fa-suitcase" style="color: #FC062D;"></i>
-  //           Experiências profissionais
-  //         </h5>
-  //         <ul>
-  //           ${data.job_experiences.map((value, index) => {
-  //             return `<li>${value.role}, ${value.company}. ${value.job_duration.title}</li>`
-  //           })}
-  //         </ul>
-  //       </div>
-  //       <div class="modal-footer">
-  //         <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
-  //       </div>
-  //     </div>
-  //   </div>
-  // `;
+          <h5 style="font-weight: bold; margin-top: 20px;">
+            <i class="fas fa-suitcase" style="color: #FC062D;"></i>
+            Experiências profissionais
+          </h5>
+          <ul>
+            ${data.job_experiences.map((value, index) => {
+              return `<li>${value.role}, ${value.company}. ${value.job_duration.title}</li>`
+            })}
+          </ul>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+        </div>
+      </div>
+    </div>
+  `;
 
-  // console.log(html);
+  console.log(html);
   
-  // $('.modal-details').html(html);
-  // $('.modal-details').modal('show');
+  $('.modal-details').html(html);
+  $('.modal-details').modal('show');
   
 }
