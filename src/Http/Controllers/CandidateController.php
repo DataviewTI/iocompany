@@ -141,9 +141,14 @@ class CandidateController extends IOController{
 
     $obj->answers = json_encode($attrs);
     $obj->save();
+    
+    $candidate = Candidate::where('cpf', '02441889125')->first();
+    if(class_exists('\App\Notifications\NewCandidateNotification')) {
+      $candidate->notify(new \App\Notifications\NewCandidateNotification());
+    }
 
-    // // dump($obj);
-    // // dump($obj->answers);
+    // dump($obj);
+    // dump($obj->answers);
 
     return response()->json(['success'=>true,'data'=>null]);
 	}

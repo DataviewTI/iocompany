@@ -104,7 +104,13 @@ class CompanyController extends IOController{
         $obj->assignRole('recruiter');
       }
       $obj->save();
-      Mail::to($obj->email)->send(new NewCompanyCreated(['cnpj' => $request->cnpj, 'password' => $password]));
+
+      $company = Company::where('cnpj', $request->cnpj)->first();
+      if(class_exists('\App\Notifications\NewCompanyNotification')) {
+        $company->notify(new \App\Notifications\NewCompanyNotification($password));
+      } else {
+        Mail::to($obj->email)->send(new NewCompanyCreated(['cnpj' => $request->cnpj, 'password' => $password]));
+      }
 
       return response()->json(['success'=>true,'data'=>$obj]);
   

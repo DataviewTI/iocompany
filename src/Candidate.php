@@ -9,9 +9,12 @@ use Dataview\IOCompany\JobExperience;
 use Dataview\IOCompany\JobDuration;
 use Dataview\IOCompany\ResignationReason;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
 class Candidate extends Authenticatable
 {
+  use Notifiable;
+
   protected $fillable = [
     'id',
     'name',

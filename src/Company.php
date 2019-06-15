@@ -7,11 +7,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Auditable;
 use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
 class Company extends Authenticatable implements AuditableContract
 {
   // IOModel -------------------------------
   use Auditable;
+  use Notifiable;
 	use SoftDeletes;
   protected $auditTimestamps = true;
 
