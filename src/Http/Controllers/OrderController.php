@@ -5,6 +5,7 @@ namespace Dataview\IOCompany;
 use Dataview\IntranetOne\IOController;
 use Illuminate\Http\Request;
 use Dataview\IOCompany\Order;
+use Dataview\IOCompany\Company;
 use Validator;
 use DataTables;
 use Session;
@@ -66,11 +67,16 @@ class OrderController extends IOController
             'wirecardData' => json_decode($order->wirecard_data, true)
         ];
         try {
-            Mail::to($order->company->email)->send(new NewOrderPlaced($data));
+            if(class_exists('\App\Notifications\NewPaymentCreatedNotification')) {
+                $company = Company::where('cnpj', $order->company_cnpj)->first();
+                $company->notify(new \App\Notifications\NewPaymentCreatedNotification($order));
+            } else {
+                Mail::to($order->company->email)->send(new NewOrderPlaced($data));
+            }
+            return ['success'=>true];
         } catch (\Exception $ex) {
             return ['success' => false, 'error' => $ex->getMessage()];
         }
-        return ['success'=>true];
     }
 
     /**
