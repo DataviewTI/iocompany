@@ -10,6 +10,8 @@ use Dataview\IOCompany\JobDuration;
 use Dataview\IOCompany\ResignationReason;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Dataview\IOCompany\CharacterSet;
+use Dataview\IOCompany\Attribute;
 
 class Candidate extends Authenticatable
 {
@@ -46,6 +48,33 @@ class Candidate extends Authenticatable
     'salary_id',
     'children_amount_id',
   ];
+
+  public function profileEvaluation() {
+    $characterSets = CharacterSet::all();
+    $attributes = Attribute::with('characterSet')->get();
+
+    $characterSetPoints = $this->getCharacterSetsPoints($characterSets, $attributes);
+    $characterSetPercentages = $this->calculatePercentage($characterSetPoints);
+
+    return [
+        'characterSetPoints' => $this->getCharacterSetsPoints($characterSets, $attributes),
+        'characterSetPercentages' => $this->calculatePercentage($this->characterSetPoints),
+    ];
+  }
+
+  public function calculatePercentage($points) {
+    $total = 0;
+    foreach ($points as $point) {
+      $total += $point;
+    }
+
+    $res = [];
+    foreach ($points as $key => $value) {
+      $res[$key] = (($value / $total) * 100);
+    }
+
+    return $res;
+  }
 
   public function getCharacterSetsPoints($characterSets, $attributes){
     $answers = json_decode($this->answers);
@@ -113,12 +142,12 @@ class Candidate extends Authenticatable
   public function manageGraduations($graduations)
   {
     $_graduations = [];
-    
+
     if($graduations != null && $graduations != "" && $graduations != " "){
       foreach($graduations as $graduation)
       {
         $graduation  = (object) $graduation;
-  
+
         if(!property_exists($graduation, 'id') || $graduation->id == null) {
           $_graduation = new Graduation([
             'institution' => $graduation->institution,
@@ -126,7 +155,7 @@ class Candidate extends Authenticatable
             'school' => $graduation->school,
           ]);
           $_graduation->graduationType()->associate(GraduationType::where('id', $graduation->graduation_type_id)->first());
-  
+
           $this->graduations()->save($_graduation);
           array_push($_graduations,$_graduation->id);
         } else {
@@ -135,15 +164,15 @@ class Candidate extends Authenticatable
             'institution' => $graduation->institution,
             'ending' => $graduation->ending,
             'school' => $graduation->school,
-          ]);	
+          ]);
           $__upd->graduationType()->dissociate();
           $__upd->graduationType()->associate(GraduationType::where('id', $graduation->graduation_type_id)->first());
-          
+
           array_push($_graduations,$graduation->id);
         }
       }
     }
-    
+
 		$to_remove = array_diff(array_column($this->graduations()->get()->toArray(),'id'),$_graduations);
 		Graduation::destroy($to_remove);
 	}
@@ -156,7 +185,7 @@ class Candidate extends Authenticatable
       foreach($jobs as $job)
       {
         $job  = (object) $job;
-  
+
         if(!property_exists($job, 'id') || $job->id == null){
           $_job = new JobExperience([
             'type' => $job->job_type,
@@ -166,7 +195,7 @@ class Candidate extends Authenticatable
           $_job->jobDuration()->associate(JobDuration::where('id', $job->job_duration_id)->first());
           if($job->job_type == 'J')
             $_job->resignationReason()->associate(ResignationReason::where('id', $job->resignation_reason_id)->first());
-  
+
           $this->jobExperiences()->save($_job);
           array_push($_jobs,$_job->id);
         } else {
@@ -175,19 +204,19 @@ class Candidate extends Authenticatable
             'type' => $job->job_type,
             'company' => $job->company,
             'role' => $job->role,
-          ]);	
+          ]);
           $__upd->jobDuration()->dissociate();
           $__upd->resignationReason()->dissociate();
-  
+
           $__upd->jobDuration()->associate(JobDuration::where('id', $job->job_duration_id)->first());
           if($job->job_type == 'J')
             $__upd->resignationReason()->associate(ResignationReason::where('id', $job->resignation_reason_id)->first());
-  
+
           array_push($_jobs,$job->id);
         }
       }
     }
-    
+
 		$to_remove = array_diff(array_column($this->jobExperiences()->get()->toArray(),'id'),$_jobs);
 		JobExperience::destroy($to_remove);
 	}
