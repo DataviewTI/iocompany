@@ -57,8 +57,8 @@ class Candidate extends Authenticatable
     $characterSetPercentages = $this->calculatePercentage($characterSetPoints);
 
     return [
-        'characterSetPoints' => $this->getCharacterSetsPoints($characterSets, $attributes),
-        'characterSetPercentages' => $this->calculatePercentage($this->characterSetPoints),
+        'characterSetPoints' => $characterSetPoints,
+        'characterSetPercentages' => $characterSetPercentages,
     ];
   }
 
