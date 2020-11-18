@@ -12,6 +12,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Dataview\IOCompany\CharacterSet;
 use Dataview\IOCompany\Attribute;
+use Dataview\IOCompany\Job;
 
 class Candidate extends Authenticatable
 {
@@ -62,6 +63,37 @@ class Candidate extends Authenticatable
     ];
   }
 
+  public function getCompatibleJobs() {
+    $characterSets = CharacterSet::all();
+    $attributes = Attribute::with('characterSet')->get();
+
+    $jobs = Job::with([
+        'profile',
+        'degree',
+        'company',
+        'company',
+        'cboOccupation',
+        'salary',
+        'pcdType',
+        'features',
+    ])->get();
+
+    foreach ($jobs as $job) {
+      $job->characterSetPoints = $job->getCharacterSetsPoints($characterSets, $attributes);
+    }
+
+    $compatibleJobs = [];
+
+    if($this->answers != null) {
+      foreach ($jobs as $job) {
+        if($this->sameOrder($this->getCharacterSetsPoints($characterSets, $attributes), $job->characterSetPoints))
+          array_push($compatibleJobs, $job);
+      }
+    }
+
+    return $compatibleJobs;
+  }
+
   public function calculatePercentage($points) {
     $total = 0;
     foreach ($points as $point) {
@@ -74,6 +106,25 @@ class Candidate extends Authenticatable
     }
 
     return $res;
+  }
+
+  public function sameOrder($a, $b) {
+    $keysA = [];
+    $keysB = [];
+    foreach ($a as $key => $value) {
+      array_push($keysA, $key);
+    }
+
+    foreach ($b as $key => $value) {
+      array_push($keysB, $key);
+    }
+
+    for ($i=0; $i < count($keysA); $i++) {
+      if($keysA[$i] != $keysB[$i])
+        return false;
+    }
+
+    return true;
   }
 
   public function getCharacterSetsPoints($characterSets, $attributes){

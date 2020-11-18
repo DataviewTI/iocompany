@@ -3,6 +3,9 @@ namespace Dataview\IOCompany;
 
 use Dataview\IntranetOne\IOModel;
 use Dataview\IntranetOne\Group;
+use Dataview\IOCompany\CharacterSet;
+use Dataview\IOCompany\Attribute;
+use Dataview\IOCompany\Candidate;
 
 class Job extends IOModel
 {
@@ -15,6 +18,33 @@ class Job extends IOModel
   protected $casts = [
     'hirer_info' => 'array'
   ];
+
+  public function getCompatibleCandidates() {
+    $characterSets = CharacterSet::all();
+    $attributes = Attribute::with('characterSet')->get();
+    $this->characterSetPoints = $this->getCharacterSetsPoints();
+    $candidates = Candidate::where('answers', '!=', NULL)->with([
+      'city',
+      'graduations.graduationType',
+      'jobExperiences.jobDuration',
+      'jobExperiences.resignationReason',
+      'degree'
+    ])->get();
+
+    foreach ($candidates as $candidate) {
+      $candidate->characterSetPoints = $candidate->getCharacterSetsPoints($characterSets, $attributes);
+      $candidate->characterSetPercentages = $this->calculatePercentage($candidate->characterSetPoints);
+    }
+
+    $compatibleCandidates = [];
+
+    foreach ($candidates as $candidate) {
+      if($this->sameOrder($this->characterSetPoints, $candidate->characterSetPoints))
+        array_push($compatibleCandidates, $candidate);
+    }
+
+    return $compatibleCandidates;
+  }
 
   public function getCharacterSetsPoints(){
     $characterSets = CharacterSet::all();
@@ -31,9 +61,42 @@ class Job extends IOModel
         $res[$featureCharacterSet->id]++;
       }
     }
-    
+
     arsort($res);
     return $res;
+  }
+
+  public function calculatePercentage($points) {
+    $total = 0;
+    foreach ($points as $point) {
+      $total += $point;
+    }
+
+    $res = [];
+    foreach ($points as $key => $value) {
+      $res[$key] = (($value / $total) * 100);
+    }
+
+    return $res;
+  }
+
+  public function sameOrder($a, $b) {
+    $keysA = [];
+    $keysB = [];
+    foreach ($a as $key => $value) {
+      array_push($keysA, $key);
+    }
+
+    foreach ($b as $key => $value) {
+      array_push($keysB, $key);
+    }
+
+    for ($i=0; $i < count($keysA); $i++) {
+      if($keysA[$i] != $keysB[$i])
+        return false;
+    }
+
+    return true;
   }
 
   public function group(){
@@ -73,7 +136,7 @@ class Job extends IOModel
   public function company()
   {
     $pkg = json_decode(file_get_contents(base_path('composer.json')),true);
-    $hasSpatie = array_has($pkg, 'require.spatie/laravel-permission');  
+    $hasSpatie = array_has($pkg, 'require.spatie/laravel-permission');
     if($hasSpatie) {
       return $this->belongsTo('\App\Company', 'company_id');
     } else {
@@ -82,7 +145,7 @@ class Job extends IOModel
   }
 
   public static function boot(){
-    parent::boot(); 
+    parent::boot();
     static::created(function (Job $obj) {
       //   if($obj->getAppend("group") !== false){
       //     $group = new Group([
@@ -93,6 +156,6 @@ class Job extends IOModel
       //     $obj->group()->associate($group)->save();
       // }
     });
-    
+
   }
 }
