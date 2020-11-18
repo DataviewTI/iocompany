@@ -1,6 +1,6 @@
 <?php
 namespace Dataview\IOCompany;
-  
+
 use Dataview\IntranetOne\IOController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Http\Response;
@@ -35,7 +35,7 @@ class CandidateController extends IOController{
   public function index(){
 		return view('Candidate::index');
 	}
-	
+
   public function list(){
     $characterSets = CharacterSet::all();
     $attributes = Attribute::with('characterSet')->get();
@@ -44,8 +44,8 @@ class CandidateController extends IOController{
       'pcdType',
       'maritalStatus',
       'salary',
-      'childrenAmount', 
-      'degree', 
+      'childrenAmount',
+      'degree',
       'graduations.graduationType',
       'jobExperiences.jobDuration',
       'city'
@@ -53,22 +53,34 @@ class CandidateController extends IOController{
 
     foreach ($candidates as $candidate) {
       $candidate->characterSetPoints = $candidate->getCharacterSetsPoints($characterSets, $attributes);
-      $candidate->characterSetPercentages = $this->calculatePercentage($candidate->characterSetPoints);
+      $candidate->characterSetPercentages = $candidate->calculatePercentage($candidate->characterSetPoints);
       $candidate->characterSets = $characterSets->toArray();
+      $candidate->answers = json_decode($candidate->answers);
     }
 
+    $candidate->attributes = $attributes;
 
     return Datatables::of(collect($candidates))->make(true);
+  }
+
+  public function jobs($candidateId) {
+    $candidate = Candidate::where('id', $candidateId)->first();
+    $characterSets = CharacterSet::all();
+
+    return response()->json(['success' => true, 'data' => [
+      'jobs' => $candidate->getCompatibleJobs(),
+      'characterSets' => $characterSets,
+    ]]);
   }
 
 	public function create(CandidateRequest $request){
     // dump($request->all());
     if(Candidate::where('cpf', $request->cpf)->first())
       return response()->json(['message' => 'Este CPF já está cadastrado!'], 500);
-      
+
     $check = $this->__create($request);
     if(!$check['status'])
-      return response()->json(['errors' => $check['errors'] ], $check['code']);	
+      return response()->json(['errors' => $check['errors'] ], $check['code']);
 
     $obj = new Candidate($request->all());
     $password = str_random(8);
@@ -92,7 +104,7 @@ class CandidateController extends IOController{
 
     if($request->__jobs != null){
       $jobs = json_decode($request->__jobs);
-  
+
       foreach ($jobs as $job) {
         $j = new JobExperience([
           'type' => $job->job_type,
@@ -126,7 +138,7 @@ class CandidateController extends IOController{
       $obj->pcdType()->associate(
         PcdType::find($request->pcd)
       );
-    } 
+    }
 
     $attributes = Attribute::with('characterSet')->get();
 
@@ -141,7 +153,7 @@ class CandidateController extends IOController{
 
     $obj->answers = json_encode($attrs);
     $obj->save();
-    
+
     $candidate = Candidate::where('cpf', '02441889125')->first();
     if(class_exists('\App\Notifications\NewCandidateNotification')) {
       $candidate->notify(new \App\Notifications\NewCandidateNotification());
@@ -156,7 +168,7 @@ class CandidateController extends IOController{
   public function view($id){
     $check = $this->__view();
     if(!$check['status'])
-      return response()->json(['errors' => $check['errors'] ], $check['code']);	
+      return response()->json(['errors' => $check['errors'] ], $check['code']);
 
     $query = $query = Candidate::where('id', $id)
     ->with([
@@ -173,14 +185,14 @@ class CandidateController extends IOController{
       $query->with(['jobDuration', 'resignationReason']);
     }])
     ->get();
-				
+
     return response()->json(['success'=>true,'data'=>$query]);
 	}
-	
+
 	public function update($id,CandidateRequest $request){
     $check = $this->__update($request);
     if(!$check['status'])
-      return response()->json(['errors' => $check['errors']], $check['code']);	
+      return response()->json(['errors' => $check['errors']], $check['code']);
 
     $_old = Candidate::find($id);
     $_old->update([
@@ -222,7 +234,7 @@ class CandidateController extends IOController{
     $_old->salary()->associate(
       Salary::find($request->salary)
     );
-    
+
     $_old->manageGraduations(json_decode($request->__graduations));
     $_old->manageJobExperiences(json_decode($request->__jobs));
 
@@ -233,32 +245,18 @@ class CandidateController extends IOController{
     } else {
       $_old->pcd_type_id = null;
     }
-    
+
     return response()->json(['success'=>$_old->save()]);
 	}
 
   public function delete($id){
     $check = $this->__delete();
     if(!$check['status'])
-      return response()->json(['errors' => $check['errors'] ], $check['code']);	
+      return response()->json(['errors' => $check['errors'] ], $check['code']);
 
     $obj = Candidate::find($id);
     $obj = $obj->delete();
     return  json_encode(['sts'=>$obj]);
-  }
-
-  public function calculatePercentage($points) {
-    $total = 0;
-    foreach ($points as $point) {
-      $total += $point;
-    }
-
-    $res = [];
-    foreach ($points as $key => $value) {
-      $res[$key] = (($value / $total) * 100);
-    }
-
-    return $res;
   }
 
 }

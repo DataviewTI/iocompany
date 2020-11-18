@@ -1,6 +1,6 @@
 <?php
 namespace Dataview\IOCompany;
-  
+
 use Dataview\IntranetOne\IOController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Http\Response;
@@ -31,7 +31,7 @@ class JobController extends IOController{
   public function index(){
 		return view('Job::index');
 	}
- 
+
   public function list(){
     $query = Job::where('id', '!=', 'null')->with([
       'profile',
@@ -54,7 +54,7 @@ class JobController extends IOController{
 	public function create(JobRequest $request){
     $check = $this->__create($request);
     if(!$check['status'])
-      return response()->json(['errors' => $check['errors'] ], $check['code']);	
+      return response()->json(['errors' => $check['errors'] ], $check['code']);
 
     $obj = new Job($request->all());
 
@@ -82,7 +82,7 @@ class JobController extends IOController{
       $obj->pcdType()->associate(
         PcdType::find($request->pcd)
       );
-    } 
+    }
     $obj->save();
 
     foreach(explode(",", $request->__features) as $featureId){
@@ -96,7 +96,7 @@ class JobController extends IOController{
   public function view($id){
     $check = $this->__view();
     if(!$check['status'])
-      return response()->json(['errors' => $check['errors'] ], $check['code']);	
+      return response()->json(['errors' => $check['errors'] ], $check['code']);
 
     $query = $query = Job::where('id', $id)->with([
       'profile',
@@ -104,7 +104,7 @@ class JobController extends IOController{
       'company',
       'company'=>function($query){
         $pkg = json_decode(file_get_contents(base_path('composer.json')),true);
-        $hasSpatie = array_has($pkg, 'require.spatie/laravel-permission');  
+        $hasSpatie = array_has($pkg, 'require.spatie/laravel-permission');
         if($hasSpatie) {
           $query->select('*')
           ->with('roles');
@@ -117,14 +117,14 @@ class JobController extends IOController{
       'pcdType',
       'features',
     ])->get();
-				
+
     return response()->json(['success'=>true,'data'=>$query]);
 	}
-	
+
 	public function update($id, JobRequest $request){
     $check = $this->__update($request);
     if(!$check['status'])
-      return response()->json(['errors' => $check['errors']], $check['code']);	
+      return response()->json(['errors' => $check['errors']], $check['code']);
 
     $_old = Job::find($id);
     $_old->date_start = $request->date_start;
@@ -134,7 +134,7 @@ class JobController extends IOController{
     $_old->apprentice = $request->apprentice;
     $_old->observations = $request->observations;
     $_old->hirer_info = $request->hirer_info;
-    
+
     $_old->cboOccupation()->associate(
       CBOOccupation::where('occupation',$request->cbo)->first()
     );
@@ -171,14 +171,14 @@ class JobController extends IOController{
     }
 
     $_old->save();
-    
+
     return response()->json(['success'=>$_old->save()]);
 	}
 
   public function delete($id){
     $check = $this->__delete();
     if(!$check['status'])
-      return response()->json(['errors' => $check['errors'] ], $check['code']);	
+      return response()->json(['errors' => $check['errors'] ], $check['code']);
 
     $obj = Job::find($id);
     $obj = $obj->delete();
@@ -208,48 +208,5 @@ class JobController extends IOController{
       dump($res);
       // return view('company.candidates', ['job' => $job, 'candidates' => $res, 'characterSets' => $characterSets, 'active' => true]);
   }
-
-  public function calculatePercentage($points) {
-    $total = 0;
-    foreach ($points as $point) {
-      $total += $point;
-    }
-
-    $res = [];
-    foreach ($points as $key => $value) {
-      $res[$key] = (($value / $total) * 100);
-    }
-
-    return $res;
-  }
-
-  public function sameOrder($a, $b) {
-    $keysA = [];
-    $keysB = [];
-    foreach ($a as $key => $value) {
-      array_push($keysA, $key);
-    }
-
-    foreach ($b as $key => $value) {
-      array_push($keysB, $key);
-    }
-
-    for ($i=0; $i < count($keysA); $i++) { 
-      if($keysA[$i] != $keysB[$i])
-        return false;
-    }
-
-    return true;
-  }
-
-  // public function orderByPoints($results) {
-  //   $bigger = 0;
-  //   $res
-  //   foreach ($results as $result) {
-  //     $sorted = array_values(Arr::sort($array, function ($value) {
-  //       return $value['name'];
-  //     }));
-  //   }
-  // }
 
 }

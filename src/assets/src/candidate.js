@@ -66,8 +66,6 @@ new IOService({
     });
 
     $('#degree').change(function () {
-      console.log($(this).find('option:selected'));
-
       if ($(this).find('option:selected').text() == "Ensino superior Completo" ||
         $(this).find('option:selected').text() == "Ensino Superior Completo"
       ) {
@@ -170,9 +168,13 @@ new IOService({
           className: "text-center",
           orderable: true,
           render: function (data, type, row, y) {
-            var today = moment();
-            var birthday = moment(data);
-            return today.diff(birthday, 'years');
+            if(data) {
+                var today = moment();
+                var birthday = moment(data);
+                return today.diff(birthday, 'years');
+            } else {
+                return '';
+            }
           }
         },
         {
@@ -519,7 +521,7 @@ new IOService({
             }),
           },
         }).setLocale('pt_BR', FormValidation.locales.pt_BR);
-  
+
 
     self.fv = [fv1, fv2, fv3];
 
@@ -922,7 +924,6 @@ function getJobs(dt) {
 function view(self) {
   return {
     onSuccess: function (data) {
-
       console.log(data);
 
       $('#name').val(data.name);
@@ -951,11 +952,20 @@ function view(self) {
         $('#address_district').val(data.address_district);
       });
 
-      $('#children_amount').val(data.children_amount.id);
-      $('#degree').val(data.degree.id);
-      $('#degree').change();
-      $('#salary').val(data.salary.id);
-      $('#marital_status').val(data.marital_status.id);
+    	if(data.children_amount)
+				$('#children_amount').val(data.children_amount.id);
+
+			if(data.degree) {
+				$('#degree').val(data.degree.id);
+				$('#degree').change();
+			}
+
+    	if(data.salary)
+				$('#salary').val(data.salary.id);
+
+    	if(data.marital_status)
+				$('#marital_status').val(data.marital_status.id);
+
       $("#birthday").pickadate('picker').set('select', new Date(data.birthday));
 
       data.job_experiences.forEach((item) => {
@@ -989,13 +999,9 @@ function view(self) {
       console.log(answers);
 
       answers.forEach(function (item) {
-        console.log(item);
-        console.log($('#answers_container select#'+item.attribute_id));
-        
-        
         $('#answers_container select#'+item.attribute_id).val(item.value)
       })
-      
+
 
     },
     onError: function (self) {
@@ -1057,84 +1063,65 @@ function setCEP(data, self) {
 }
 
 function preview(data) {
-  console.log(data);
+    console.log(data);
 
-  let teste = [];
-
-  console.log(Object.entries(data.characterSetPercentages).map((value, index) => {
-    return `<p>
-      <span style="color: #FC062D; font-weight: bold">${Number(parseFloat(value[1].replace(',', '.')).toFixed(2))} % </span>
-      ${Array.from(data.characterSets).filter((val, id) => {
-        return id == index
-      })[0].title}
-    </p>`
-  }).toString().replace(/,/g, ''));
-  
-
-  let html = `
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">${data.name}</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <p>
-            <i class="fas fa-envelope" style="color: #FC062D;"></i>
-            ${data.email}
-          </p>
-          <p>
-            <i class="fas fa-phone" style="color: #FC062D;"></i>
-            ${data.phone}
-          </p>
-          <p>
-            <i class="fas fa-map-marker" style="color: #FC062D;"></i>
-            ${data.city.city} - ${data.address_state}
-          </p>
-          <h5 style="font-weight: bold;">Perfil</h5>
-          ${Object.entries(data.characterSetPercentages).map((value, index) => {
+    $('.modal #candidate-name').html(data.name ? data.name : '');
+    $('.modal #candidate-email').html(data.email ? data.email : '');
+    $('.modal #candidate-phone').html(data.phone ? data.phone : '');
+    $('.modal #candidate-mobile').html(data.mobile ? data.mobile : '');
+    $('.modal #candidate-address-street').html(data.address_street ? data.address_street : '');
+    $('.modal #candidate-address-number').html(data.address_number ? data.address_number : '');
+    $('.modal #candidate-zipcode').html(data.zipCode ? data.zipCode : '');
+    $('.modal #candidate-address-district').html(data.address_district ? data.address_district : '');
+    $('.modal #candidate-city').html(data.city ? data.city.city : '');
+    $('.modal #candidate-address_state').html(data.address_state ? data.address_state : '');
+    $('.modal #profile #evaluation').html(`
+        ${Object.entries(data.characterSetPercentages).map((value, index) => {
             return `<p>
-              <span style="color: #FC062D; font-weight: bold">${Number(parseFloat(value[1].replace(',', '.')).toFixed(2))} % </span>
-              ${Array.from(data.characterSets).filter((val, id) => {
+            <span style="color: #FC062D; font-weight: bold">${Number(parseFloat(value[1].replace(',', '.')).toFixed(2))} % </span>
+            ${Array.from(data.characterSets).filter((val, id) => {
                 return id == index
-              })[0].title}
+            })[0].title}
             </p>`
-          }).toString().replace(/,/g, '')}
-          <h5 style="font-weight: bold;">
-            <i class="fas fa-graduation-cap" style="color: #FC062D;"></i>
-            Formação acadêmica
-          </h5>
-          <p>
-            ${data.degree.degree}
-          </p>
-          <ul>
-            ${data.graduations.map((value, index) => {
-              return `<li>${value.graduation_type.title} em ${value.school}, ${value.ending}, ${value.institution}</li>`
-            })}
-          </ul>
+        }).toString().replace(/,/g, '')}
+    `);
 
-          <h5 style="font-weight: bold; margin-top: 20px;">
-            <i class="fas fa-suitcase" style="color: #FC062D;"></i>
-            Experiências profissionais
-          </h5>
-          <ul>
-            ${data.job_experiences.map((value, index) => {
-              return `<li>${value.role}, ${value.company}. ${value.job_duration.title}</li>`
-            })}
-          </ul>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
-        </div>
-      </div>
-    </div>
-  `;
+    //   $('.modal-details').html(html);
+    $('.modal-details').modal('show');
 
-  console.log(html);
-  
-  $('.modal-details').html(html);
-  $('.modal-details').modal('show');
-  
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        let tab = $(e.target)[0];
+
+        if(tab.id == 'jobs-tab') {
+            $.ajax({
+                url: '/admin/candidate/jobs/'+data.id,
+                method: 'get',
+                beforeSend: function(){
+                    HoldOn.open({message:"Carregando dados, aguarde...",theme:'sk-bounce'});
+                },
+                success: function(data){
+                    console.log('data', data);
+
+                    let html = '';
+
+                    data.data.jobs.forEach(item => {
+                        html += `<th scope="row">${item.id}</th>
+                                <td>${item.company.cnpj} - ${item.company.nomeFantasia}</td>
+                                <td>${item.cbo_occupation.occupation}</td>`
+                    });
+
+                    $('.modal #jobs-list').html(html);
+
+                    HoldOn.close();
+                },
+                error:function(ret){
+                    self.defaults.ajax.onError(ret,self.callbacks.create.onError);
+                }
+            });
+
+        }
+
+
+    })
+
 }

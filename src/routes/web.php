@@ -8,7 +8,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['web','admin'], 'as' => 'adm
     Route::get('list', 'CompanyController@list');
     Route::get('view/{id}', 'CompanyController@view');
     Route::post('update/{id}', 'CompanyController@update');
-    Route::get('delete/{id}', 'CompanyController@delete');			
+    Route::get('delete/{id}', 'CompanyController@delete');
   });
 
   Route::group(['prefix' => 'orders'], function () {
@@ -23,11 +23,12 @@ Route::group(['prefix' => 'admin', 'middleware' => ['web','admin'], 'as' => 'adm
     Route::get('/','CandidateController@index');
     Route::post('create', 'CandidateController@create');
     Route::get('list', 'CandidateController@list');
+    Route::get('jobs/{candidateId}', 'CandidateController@jobs');
     Route::get('cbo/list/{kw?}', 'CandidateController@cboList');
     Route::get('view/{id}', 'CandidateController@view');
     Route::post('update/{id}', 'CandidateController@update');
-    Route::get('delete/{id}', 'CandidateController@delete');			
-  });  
+    Route::get('delete/{id}', 'CandidateController@delete');
+  });
 
   Route::group(['prefix' => 'job'], function () {
     Route::get('/','JobController@index');
@@ -36,7 +37,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['web','admin'], 'as' => 'adm
     Route::get('cbo/list/{kw?}', 'JobController@cboList');
     Route::get('view/{id}', 'JobController@view');
     Route::post('update/{id}', 'JobController@update');
-    Route::get('delete/{id}', 'JobController@delete');			
-    Route::get('{id}/candidates', 'JobController@getCompatibleCandidates');			
-  });  
+    Route::get('delete/{id}', 'JobController@delete');
+    Route::get('{id}/candidates', 'JobController@getCompatibleCandidates');
+  });
 });
