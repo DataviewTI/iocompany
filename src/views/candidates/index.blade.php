@@ -110,6 +110,60 @@
                                     <span id="candidate-address-state"></span>
                                 </p>
                             </div>
+                            <div class="col-4">
+                                <p>
+                                    Aprendiz:
+                                    <span id="candidate-apprentice"></span>
+                                </p>
+                            </div>
+                            <div class="col-4">
+                                <p>
+                                    Data de nascimento:
+                                    <span id="candidate-birthday"></span>
+                                </p>
+                            </div>
+                            <div class="col-4">
+                                <p>
+                                    Sexo:
+                                    <span id="candidate-gender"></span>
+                                </p>
+                            </div>
+                            <div class="col-4">
+                                <p>
+                                    Número de filhos:
+                                    <span id="candidate-children-amount"></span>
+                                </p>
+                            </div>
+                            <div class="col-4">
+                                <p>
+                                    Estado civil:
+                                    <span id="candidate-marital-status"></span>
+                                </p>
+                            </div>
+                            <div class="col-4">
+                                <p>
+                                    Pretensão salarial:
+                                    <span id="candidate-salary"></span>
+                                </p>
+                            </div>
+                            <div class="col-4">
+                                <p>
+                                    CNH:
+                                    <span id="candidate-cnh"></span>
+                                </p>
+                            </div>
+                            <div class="col-4">
+                                <p>
+                                    CPF:
+                                    <span id="candidate-cpf"></span>
+                                </p>
+                            </div>
+                            <div class="col-4">
+                                <p>
+                                    RG:
+                                    <span id="candidate-rg"></span>
+                                </p>
+                            </div>
                         </div>
                     </div>
                     <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">

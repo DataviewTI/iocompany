@@ -1082,7 +1082,16 @@ function preview(data) {
 	$('.modal #candidate-zipcode').html(data.zipCode ? data.zipCode : '');
 	$('.modal #candidate-address-district').html(data.address_district ? data.address_district : '');
 	$('.modal #candidate-city').html(data.city ? data.city.city : '');
-    $('.modal #candidate-address_state').html(data.address_state ? data.address_state : '');
+    $('.modal #candidate-address-state').html(data.address_state ? data.address_state : '');
+	$('.modal #candidate-apprentice').html(data.apprentice ? (data.apprentice == 'S' ? 'Sim' : 'Não') : '');
+    $('.modal #candidate-birthday').html(data.birthday ? data.birthday : '');
+	$('.modal #candidate-gender').html(data.gender ? (data.gender == 'F' ? 'Feminino' : 'Masculino') : '');
+	$('.modal #candidate-children-amount').html(data.children_amount ? data.children_amount.title : '');
+	$('.modal #candidate-marital-status').html(data.marital_status ? data.marital_status.title : '');
+    $('.modal #candidate-salary').html(data.salary ? data.salary.salary : '');
+    $('.modal #candidate-cnh').html(data.cnh ? data.cnh : '');
+    $('.modal #candidate-cpf').html(data.cpf ? data.cpf : '');
+    $('.modal #candidate-rg').html(data.rg ? data.rg : '');
 
     if(data.characterSetPercentages) {
         $('.modal #profile #evaluation').html(`
