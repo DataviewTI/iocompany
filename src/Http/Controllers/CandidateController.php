@@ -54,19 +54,31 @@ class CandidateController extends IOController{
     $count = $candidates->count();
 
     if($request->query('draw')) {
-        $candidates->limit($request->query('length'))->offset($request->query('start'));
+        $candidates->limit(8)->offset($request->query('start'));
     }
 
-    // $candidates = $candidates->get();
+    $candidates = $candidates->get();
 
     foreach ($candidates as $candidate) {
       $candidate->characterSetPoints = $candidate->getCharacterSetsPoints($characterSets, $attributes);
       $candidate->characterSetPercentages = $candidate->calculatePercentage($candidate->characterSetPoints);
       $candidate->characterSets = $characterSets->toArray();
       $candidate->answers = json_decode($candidate->answers);
+      $candidate->attributes = $attributes;
     }
 
-    return Datatables::of($candidates)->setTotalRecords($count)->make(true);
+    if($request->query('draw')) {
+        return response()->json([
+            'draw' => $request->query('draw'),
+            'recordsTotal' => $count,
+            'recordsFiltered' => $count,
+            'data' => $candidates,
+
+        ]);
+        // Datatables::collection($candidates)->setTotalRecords($count)->make(true);
+    } else {
+        return Datatables::of($candidates)->make(true);
+    }
   }
 
   public function jobs($candidateId) {

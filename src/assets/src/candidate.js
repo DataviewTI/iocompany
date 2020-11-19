@@ -1088,7 +1088,7 @@ function preview(data) {
         $('.modal #profile #evaluation').html(`
             ${Object.entries(data.characterSetPercentages).map((value, index) => {
                 return `<p>
-                <span style="color: #FC062D; font-weight: bold">${Number(parseFloat(value[1].replace(',', '.')).toFixed(2))} % </span>
+                <span style="color: #FC062D; font-weight: bold">${value[1].toFixed(2)} % </span>
                 ${Array.from(data.characterSets).filter((val, id) => {
                     return id == index
                 })[0].title}
@@ -1096,6 +1096,14 @@ function preview(data) {
             }).toString().replace(/,/g, '')}
         `);
     }
+
+    $('.modal #profile #answers').html(`
+        ${data.answers.map((answer, index) => {
+            return `<div class="col-3">
+                <span>${data.attributes.filter(attribute => attribute.id == answer.attribute_id)[0].title}: ${answer.value}</span>
+            </div>`
+        }).toString().replace(/,/g, '')}
+    `);
 
 	//   $('.modal-details').html(html);
 	$('.modal-details').modal('show');
