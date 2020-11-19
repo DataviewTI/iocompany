@@ -36,7 +36,7 @@ class CandidateController extends IOController{
 		return view('Candidate::index');
 	}
 
-  public function list(){
+  public function list(Request $request){
     $characterSets = CharacterSet::all();
     $attributes = Attribute::with('characterSet')->get();
 
@@ -49,7 +49,15 @@ class CandidateController extends IOController{
       'graduations.graduationType',
       'jobExperiences.jobDuration',
       'city'
-    ])->get();
+    ]);
+
+    $count = $candidates->count();
+
+    if($request->query('draw')) {
+        $candidates->limit($request->query('length'))->offset($request->query('start'));
+    }
+
+    // $candidates = $candidates->get();
 
     foreach ($candidates as $candidate) {
       $candidate->characterSetPoints = $candidate->getCharacterSetsPoints($characterSets, $attributes);
@@ -58,9 +66,7 @@ class CandidateController extends IOController{
       $candidate->answers = json_decode($candidate->answers);
     }
 
-    $candidate->attributes = $attributes;
-
-    return Datatables::of(collect($candidates))->make(true);
+    return Datatables::of($candidates)->setTotalRecords($count)->make(true);
   }
 
   public function jobs($candidateId) {
