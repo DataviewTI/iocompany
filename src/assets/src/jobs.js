@@ -294,9 +294,7 @@ new IOService({
             })
             .on("click", ".ico-eye", function () {
                 var data = self.dt.row($(this).parents("tr")).data();
-                preview({
-                    id: data.cnpj
-                });
+                preview(data);
             })
             .on("draw.dt", function () {
                 $('[data-toggle="tooltip"]').tooltip();
@@ -881,4 +879,102 @@ function toggleHirerForm(self, data) {
     //         HoldOn.close();
     //     }
     // });
+}
+
+function preview(data) {
+	console.log(data);
+
+	$('.modal #job-company').html(data.company ? `${data.company.cnpj} - ${data.company.nomeFantasia}` : '');
+	$('.modal #job-profile').html(data.profile ? data.profile.profile : '');
+	$('.modal #job-cbo-occupation').html(data.cbo_occupation ? data.cbo_occupation.occupation : '');
+	$('.modal #job-degree').html(data.degree ? data.degree.degree : '');
+	$('.modal #job-apprentice').html(data.apprentice ? (data.apprentice == 'S' ? 'Sim' : 'Não') : '');
+    $('.modal #job-pcd').html(data.pcd_type ? data.pcd_type.title : '');
+    $('.modal #job-salary').html(data.salary ? data.salary.salary : '');
+
+    switch (data.gender) {
+        case 'I':
+	        $('.modal #job-gender').html('Indiferente');
+            break;
+
+        case 'F':
+            $('.modal #job-gender').html('Feminino');
+            break;
+
+        case 'M':
+            $('.modal #job-gender').html('Masculino');
+            break;
+
+        default:
+            break;
+    }
+
+    $('.modal #job-profile').html(data.profile ? data.profile.profile : '');
+
+	$('.modal-details').modal('show');
+
+    $('.modal-details').on('hidden.bs.modal', function (e) {
+        $('.modal #candidates-list').html('');
+    })
+
+	$('#fetch-candidates').click(function (e) {
+        $.ajax({
+            url: `/admin/job/${data.id}/candidates`,
+            method: 'get',
+            beforeSend: function(){
+                HoldOn.open({message:"Carregando dados, aguarde...",theme:'sk-bounce'});
+            },
+            success: function(data){
+                console.log('data', data);
+
+                let html = '';
+
+                data.data.candidates.forEach(item => {
+                    html += '<tr>';
+
+                    html += `<th scope="row">${item.id}</th>
+                            <td>${item.name}</td>
+                            <td>${item.email}</td>
+                            <td>${item.phone}</td>
+                            <td>${item.mobile}</td>
+                            <td>${item.city.city} - ${item.city.state}</td>
+                    `;
+
+                    let sortedPercentages = Object.entries(item.characterSetPercentages).sort((a, b) => {
+                        if(a[1] > b[1]) {
+                            return -1;
+                        }
+
+                        if(a[1] < b[1]) {
+                            return 1;
+                        }
+
+                        return 0;
+                    });
+
+                    html += `<td>
+                                ${sortedPercentages.map((value, index) => {
+                                    return `
+                                        <span style="color: #FC062D; font-weight: bold">${value[1].toFixed(2)} % </span>
+                                        ${Array.from(item.characterSets).filter((val, id) => {
+                                            return id == index
+                                        })[0].title} /
+                                    `
+                                }).toString().replace(/,/g, '')}
+                            </td>
+                        `;
+
+                    html += '</tr>';
+                });
+
+                $('.modal #candidates-list').html(html);
+
+                HoldOn.close();
+            },
+            error:function(ret){
+                self.defaults.ajax.onError(ret,self.callbacks.create.onError);
+            }
+        });
+    });
+
 }

@@ -185,28 +185,12 @@ class JobController extends IOController{
     return  json_encode(['sts'=>$obj]);
   }
 
-  public function getCompatibleCandidates($jobId){
-    dump($jobId);
-      $job = Job::where('id', $jobId)->with(['features', 'cboOccupation'])->first();
-      $characterSets = CharacterSet::all();
-      $job->characterSetPoints = $job->getCharacterSetsPoints();
-      // dump($job);
-      $candidates = Candidate::whereHas('answers')->with('city')->get();
-      foreach ($candidates as $candidate) {
-          $candidate->characterSetPoints = $candidate->getCharacterSetsPoints();
-          $candidate->characterSetPercentages = $this->calculatePercentage($candidate->characterSetPoints);
-      }
+  public function getCompatibleCandidates($jobId) {
+    $job = Job::where('id', $jobId)->with(['features', 'cboOccupation'])->first();
 
-      $res = [];
-
-      foreach ($candidates as $candidate) {
-          if($this->sameOrder($job->characterSetPoints, $candidate->characterSetPoints))
-              array_push($res, $candidate);
-              // break;
-      }
-
-      dump($res);
-      // return view('company.candidates', ['job' => $job, 'candidates' => $res, 'characterSets' => $characterSets, 'active' => true]);
+    return response()->json(['success' => true, 'data' => [
+        'candidates' => $job->getCompatibleCandidates(),
+    ]]);
   }
 
 }

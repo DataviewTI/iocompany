@@ -34,6 +34,7 @@ class Job extends IOModel
     foreach ($candidates as $candidate) {
       $candidate->characterSetPoints = $candidate->getCharacterSetsPoints($characterSets, $attributes);
       $candidate->characterSetPercentages = $this->calculatePercentage($candidate->characterSetPoints);
+      $candidate->characterSets = $characterSets;
     }
 
     $compatibleCandidates = [];

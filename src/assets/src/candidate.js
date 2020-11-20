@@ -1092,6 +1092,7 @@ function preview(data) {
     $('.modal #candidate-cnh').html(data.cnh ? data.cnh : '');
     $('.modal #candidate-cpf').html(data.cpf ? data.cpf : '');
     $('.modal #candidate-rg').html(data.rg ? data.rg : '');
+    $('.modal #candidate-pcd').html(data.pcd_type ? data.pcd_type.title : '');
 
     if(data.characterSetPercentages) {
         $('.modal #profile #evaluation').html(`
@@ -1117,39 +1118,36 @@ function preview(data) {
 	//   $('.modal-details').html(html);
 	$('.modal-details').modal('show');
 
-	$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-		let tab = $(e.target)[0];
+    $('.modal-details').on('hidden.bs.modal', function (e) {
+        $('.modal #jobs-list').html('');
+    })
 
-		if(tab.id == 'jobs-tab') {
-			$.ajax({
-				url: '/admin/candidate/jobs/'+data.id,
-				method: 'get',
-				beforeSend: function(){
-					HoldOn.open({message:"Carregando dados, aguarde...",theme:'sk-bounce'});
-				},
-				success: function(data){
-					console.log('data', data);
+	$('#fetch-jobs').click(function (e) {
+        $.ajax({
+            url: '/admin/candidate/jobs/'+data.id,
+            method: 'get',
+            beforeSend: function(){
+                HoldOn.open({message:"Carregando dados, aguarde...",theme:'sk-bounce'});
+            },
+            success: function(data){
+                console.log('data', data);
 
-					let html = '';
+                let html = '';
 
-					data.data.jobs.forEach(item => {
-						html += `<th scope="row">${item.id}</th>
-								<td>${item.company.cnpj} - ${item.company.nomeFantasia}</td>
-								<td>${item.cbo_occupation.occupation}</td>`
-					});
+                data.data.jobs.forEach(item => {
+                    html += `<th scope="row">${item.id}</th>
+                            <td>${item.company.cnpj} - ${item.company.nomeFantasia}</td>
+                            <td>${item.cbo_occupation.occupation}</td>`
+                });
 
-					$('.modal #jobs-list').html(html);
+                $('.modal #jobs-list').html(html);
 
-					HoldOn.close();
-				},
-				error:function(ret){
-					self.defaults.ajax.onError(ret,self.callbacks.create.onError);
-				}
-			});
-
-		}
-
-
+                HoldOn.close();
+            },
+            error:function(ret){
+                self.defaults.ajax.onError(ret,self.callbacks.create.onError);
+            }
+        });
 	})
 
 }

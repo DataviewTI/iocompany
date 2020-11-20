@@ -57,7 +57,7 @@ class CandidateController extends IOController{
         $candidates->limit(8)->offset($request->query('start'));
     }
 
-    $candidates = $candidates->get();
+    $candidates = $candidates->orderBy('id', 'desc')->get();
 
     foreach ($candidates as $candidate) {
       $candidate->characterSetPoints = $candidate->getCharacterSetsPoints($characterSets, $attributes);

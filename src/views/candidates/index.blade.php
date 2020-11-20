@@ -164,6 +164,12 @@
                                     <span id="candidate-rg"></span>
                                 </p>
                             </div>
+                            <div class="col-4">
+                                <p>
+                                    PCD:
+                                    <span id="candidate-pcd"></span>
+                                </p>
+                            </div>
                         </div>
                     </div>
                     <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
@@ -179,6 +185,7 @@
                         </div>
                     </div>
                     <div class="tab-pane fade" id="jobs" role="tabpanel" aria-labelledby="jobs-tab">
+                        <button type="button" id="fetch-jobs" class="btn btn-primary mb-2">Atualizar</button>
                         <table class="table table-bordered">
                             <thead>
                                 <tr>
