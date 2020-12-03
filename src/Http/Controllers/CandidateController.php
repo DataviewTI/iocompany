@@ -264,6 +264,19 @@ class CandidateController extends IOController{
       $_old->pcd_type_id = null;
     }
 
+    $attributes = Attribute::with('characterSet')->get();
+
+    $attrs = [];
+    foreach ($attributes as $attribute) {
+      array_push($attrs, [
+        'attribute_id' => $attribute->id,
+        'character_set_id' => $attribute->characterSet->id,
+        'value' => $request->{$attribute->id},
+      ]);
+    }
+
+    $_old->answers = json_encode($attrs);
+
     return response()->json(['success'=>$_old->save()]);
 	}
 
