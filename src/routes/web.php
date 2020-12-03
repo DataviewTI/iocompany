@@ -14,7 +14,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['web','admin'], 'as' => 'adm
   Route::group(['prefix' => 'orders'], function () {
     Route::get('/', 'OrderController@index');
     Route::get('list', 'OrderController@list');
-    Route::post('sync', 'OrderController@sync');
+    Route::get('sync-payments', 'OrderController@syncPayments');
     Route::post('store', 'OrderController@store');
     Route::get('send-email/{orderId}', 'OrderController@sendOrderEmail');
   });

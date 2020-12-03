@@ -32,7 +32,7 @@ class OrderController extends IOController
      */
     public function index()
     {
-        // 
+        //
     }
 
     /**
@@ -45,38 +45,37 @@ class OrderController extends IOController
         //
     }
 
-    public function sync(Request $request)
+    public function syncPayments(Request $request)
     {
-        // dump($request->all());
+        try {
+            $token = base64_encode(config('wirecard.token').':'.config('wirecard.key'));
 
-        foreach (Order::all() as $order) {
-            foreach ($request->all()['orders'] as $wirecardOrder) {
-                if($wirecardOrder['id'] == json_decode($order->wirecard_data)->id) {
-                    $order->wirecard_data = json_encode($wirecardOrder);
-                    $order->save();
+            $http = new \GuzzleHttp\Client;
+
+            $res = $http->get(config('wirecard.endpoint').'/v2/orders', [
+                'headers' => [
+                    'Authorization' => 'Basic '.$token,
+                ],
+            ]);
+
+            $ret = json_decode($res->getBody());
+
+            foreach (Order::all() as $order) {
+                foreach ($ret->orders as $wirecardOrder) {
+                    if($order->wirecard_data != null) {
+                        if($wirecardOrder->id == json_decode($order->wirecard_data)->id) {
+                            $order->wirecard_data = json_encode($wirecardOrder);
+                            $order->save();
+                        }
+                    }
                 }
             }
+        } catch (\GuzzleHttp\Exception\BadResponseException $e) {
+            report($e);
+            return response()->json(['success'=>false, 'error' => $e->getMessage()]);
         }
 
         return response()->json(['success'=>true]);
-    }
-
-    public function sendOrderEmail($order) {
-        $data = [
-            'payment_method' => $order['payment_method'],
-            'wirecardData' => json_decode($order->wirecard_data, true)
-        ];
-        try {
-            if(class_exists('\App\Notifications\NewPaymentCreatedNotification')) {
-                $company = Company::where('cnpj', $order->company_cnpj)->first();
-                $company->notify(new \App\Notifications\NewPaymentCreatedNotification($order));
-            } else {
-                Mail::to($order->company->email)->send(new NewOrderPlaced($data));
-            }
-            return ['success'=>true];
-        } catch (\Exception $ex) {
-            return ['success' => false, 'error' => $ex->getMessage()];
-        }
     }
 
     /**
@@ -87,30 +86,90 @@ class OrderController extends IOController
      */
     public function store(Request $request)
     {
-        // dump($request->all());
+        $token = base64_encode(config('wirecard.token').':'.config('wirecard.key'));
 
         $order = [
-            'company_cnpj' => json_decode($request->company)->cnpj,
-            'plan_id' => json_decode($request->plan)->id,
-            'max_portions' => $request->max_portions,
-            'wirecard_data' => $request->wirecard_data
+            'company_cnpj' => $request['company']['cnpj'],
+            'plan_id' => $request['plan']['id'],
+            'max_portions' => $request['max_portions'],
         ];
 
         if ($request->has(['credit_card', 'boleto'])) {
             $order['payment_method'] = null;
-        } elseif ($request->has('credit_card')) {
+        } else if ($request->has('credit_card')) {
             $order['payment_method'] = 'CREDIT_CARD';
-        } elseif ($request->has('boleto')) {
+        } else if ($request->has('boleto')) {
             $order['payment_method'] = 'BOLETO';
         }
 
-        $order = new Order($order);
+        $order = Order::create($order);
 
-        if($order->save()) {
-            $this->sendOrderEmail($order);
+        try {
+            $http = new \GuzzleHttp\Client;
+
+            $res = $http->post(config('wirecard.endpoint').'/v2/orders',[
+                'headers' => [
+                    'Authorization' => 'Basic '.$token,
+                ],
+                'json' => [
+                    'ownId' => $order->id,
+                    'amount' => [
+                        'currency' => 'BRL',
+                    ],
+                    'items' => [
+                        [
+                            'product' => 'Plano Palmjob =>  '.$order->plan->name,
+                            'category' => 'BUSINESS_AND_INDUSTRIAL',
+                            'quantity' => 1,
+                            'detail' => $order->plan->description,
+                            'price' => str_replace('.', '', $order->plan->amount)
+                        ]
+                    ],
+                    'checkoutPreferences' => [
+                        'redirectUrls' => [
+                            'urlSuccess' => config('app.url').'/payment-success'
+                        ]
+                    ],
+                    'customer' => [
+                        'ownId' => $order->company->cnpj,
+                        'fullname' => $order->company->razaoSocial,
+                        'email' => $order->company->email,
+                        'birthDate' => '2019-01-01',
+                        'taxDocument' => [
+                            'type' => 'CNPJ',
+                            'number' => $order->company->cnpj
+                        ],
+                        'phone' => [
+                            'countryCode' => '55',
+                            'areaCode' => '00',
+                            'number' => $order->company->phone
+                        ],
+                        'shippingAddress' => [
+                            'city' => $order->company->city_id,
+                            'district' => $order->company->address2,
+                            'street' => $order->company->address,
+                            'streetNumber' => $order->company->numberApto,
+                            'zipCode' => $order->company->zipCode,
+                            'state' => $order->company->city->state,
+                            'country' => 'BRA'
+                        ]
+                    ],
+                ]
+            ]);
+
+            $ret = json_decode($res->getBody());
+
+            $order->update([
+                'wirecard_data' => json_encode($ret)
+            ]);
+        } catch (\GuzzleHttp\Exception\BadResponseException $e) {
+            report($e);
+            return response()->json(['success'=>false, 'error' => $e->getMessage()]);
         }
 
-        // dump($order);
+        if($order) {
+            $order->sendPaymentEmail();
+        }
 
         return response()->json(['success'=>$order]);
     }

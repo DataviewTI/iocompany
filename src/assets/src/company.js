@@ -5,9 +5,7 @@ function (self) {
     $('#open-orders-modal').click(function (e) {
        $('#order-modal').modal('show')
     });
-    
-    loadOrders()
-    
+
     $('#create-order').click(function (e) {
         e.preventDefault();
         createOrder();
@@ -42,6 +40,15 @@ function (self) {
         },
         onComplete: function (val, e, field) {
             $(field).parent().parent().next().find('input').first().focus();
+        }
+    });
+
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        e.target // newly activated tab
+        e.relatedTarget // previous active tab
+
+        if(e.target.attributes.__name.nodeValue == 'pagamentos') {
+            loadOrders();
         }
     });
 
@@ -399,303 +406,253 @@ function (self) {
 
 function loadOrders() {
     $.ajax({
-        url: 'https://sandbox.moip.com.br/v2/orders',
+        url: '/admin/orders/sync-payments',
         method: 'GET',
-        headers: {
-            "Authorization": "Basic "+token,
-            "Content-Type": "application/json"
-        },
         beforeSend: function(){
-        //   HoldOn.open({message:"Criando pagamento, aguarde...",theme:'sk-bounce'});
+            HoldOn.open({message:"Carregando pagamentos, aguarde...",theme:'sk-bounce'});
         },
         complete: (data) => {
         },
         success: (data) => {
-            $.ajax({
-                url: '/admin/orders/sync',
-                method: 'POST',
-                data: data,
-                beforeSend: function(){
-                //   HoldOn.open({message:"Criando pagamento, aguarde...",theme:'sk-bounce'});
+            self.ordersDt = $('#orders-table').DataTable({
+                aaSorting:[[0,"desc"]],
+                ajax: '/admin/orders/list',
+                initComplete:function(settings, json){
+                    HoldOn.close();
                 },
-                complete: (data) => {
+                footerCallback:function(row, data, start, end, display){
                 },
-                success: (data) => {
-                    self.ordersDt = $('#orders-table').DataTable({
-                        aaSorting:[[0,"desc"]],
-                        ajax: '/admin/orders/list',
-                        initComplete:function(settings, json){
-                        },
-                        footerCallback:function(row, data, start, end, display){
-                        },
-                        columns: [
-                          { data: 'id', name: 'id'},
-                          { data: 'company', name: 'company'},
-                          { data: 'company', name: 'company'},
-                          { data: 'company', name: 'company'},
-                          { data: 'plan', name: 'plan'},
-                          { data: 'wirecard_data', name: 'wirecard_data'},
-                          { data: 'wirecard_data', name: 'wirecard_data'},
-                          { data: 'wirecard_data', name: 'wirecard_data'},
-                          { data: "actions",  name: "actions" }
-                        ],
-                        columnDefs:
-                        [
-                            {
-                                targets: "__dt_cnpj",
-                                render: function (data, type, row, y) {
-                                    return data.cnpj
-                                }
-                            },
-                            {
-                                targets: "__dt_razao-social",
-                                render: function (data, type, row, y) {
-                                    return data.razaoSocial
-                                }
-                            },
-                            {
-                                targets: "__dt_email",
-                                render: function (data, type, row, y) {
-                                    return data.email
-                                }
-                            },
-                            {
-                                targets: "__dt_plano",
-                                render: function (data, type, row, y) {
-                                    return data.name
-                                }
-                            },
-                            {
-                                targets: "__dt_valor",
-                                render: function (data, type, row, y) {
-                                    var size = data.amount.total.length
-                                    return [data.amount.total.slice(0, size-2), '.', data.amount.total.slice(size-2)].join('')
-                                }
-                            }, 
-                            {
-                                targets: "__dt_status",
-                                render: function (data, type, row, y) {
-                                    if(data.status == 'PAID')
-                                        return 'Pago'
-                
-                                    if(data.status == 'REVERTED')
-                                        return 'Devolvido'
-                                    
-                                    return 'Aguardando pagamento'
-                                }
-                            },
-                            {
-                                targets: "__dt_dt-pagamento",
-                                render: function (data, type, row, y) {
-                                    if(data.status == 'PAID'){
-                                        let date;
-                                        data.events.forEach(event => {
-                                            if(event.type == 'PAYMENT.AUTHORIZED') {
-                                                date = event.createdAt
-                                            }
-                                        });
-
-                                        date = new Date(date)
-                                        return (date.getDate() < 10 ? ('0'+date.getDate()) : date.getDate())  + '/' 
-                                            + (date.getMonth() < 9 ? ('0'+(date.getMonth()+1)) : (date.getMonth()+1))  + '/' 
-                                            + date.getFullYear()
-                                    }
-                
-                                    return ''
-                                }
-                            },
-                            {
-                                targets:'__dt_acoes',width:"7%",className:"text-center",searchable:false,orderable:false,render:function(data,type,row,y){
-                                    if(row.wirecard_data.status != 'PAID') {
-                                        return self.ordersDt.addDTButtons({
-                                            buttons:[
-                                                {ico:'ico-mail',_class: 'text-success',title:'Reenviar email para pagamento'},
-                                                {ico:'ico-trash',_class:'text-danger',title:'Excluir'},
-                                            ]}); 
-                                    }
-
-                                    return ''
-                                }
-                            },
-                        ]	
-                    }).on('click','.ico-mail',function(){
-                        var data = self.ordersDt.row($(this).parents('tr')).data();
-
-                        $.ajax({
-                          url: '/admin/orders/send-email/'+data.id, 
-                          method: 'GET',
-                          beforeSend: function(){
-                               // HoldOn.open({message:"Enviando email, aguarde...",theme:'sk-bounce'});
-                          },
-                          success: function(data){
-                            HoldOn.close();
-                            if(data.success)
-                            {
-                              swal({
-                                title:"Um email para pagamento foi enviado para "+data.order.company.email,
-                                confirmButtonText:'OK',
-                                type:"success",
-                              });
-                            }else{
-                              swal({
-                                title:"Não foi possível enviar o email para pagamento. Verifique se o email cadastrado está correto",
-                                confirmButtonText:'OK',
-                                type:"error",
-                              });
+                columns: [
+                    { data: 'id', name: 'id'},
+                    { data: 'company', name: 'company'},
+                    { data: 'company', name: 'company'},
+                    { data: 'company', name: 'company'},
+                    { data: 'plan', name: 'plan'},
+                    { data: 'wirecard_data', name: 'wirecard_data'},
+                    { data: 'wirecard_data', name: 'wirecard_data'},
+                    { data: 'wirecard_data', name: 'wirecard_data'},
+                    { data: "actions",  name: "actions" }
+                ],
+                columnDefs:
+                [
+                    {
+                        targets: "__dt_cnpj",
+                        render: function (data, type, row, y) {
+                            return data.cnpj
+                        }
+                    },
+                    {
+                        targets: "__dt_razao-social",
+                        render: function (data, type, row, y) {
+                            return data.razaoSocial
+                        }
+                    },
+                    {
+                        targets: "__dt_email",
+                        render: function (data, type, row, y) {
+                            return data.email
+                        }
+                    },
+                    {
+                        targets: "__dt_plano",
+                        render: function (data, type, row, y) {
+                            return data.name
+                        }
+                    },
+                    {
+                        targets: "__dt_valor",
+                        render: function (data, type, row, y) {
+                            if(data) {
+                                var size = data.amount.total.length
+                                return [data.amount.total.slice(0, size-2), '.', data.amount.total.slice(size-2)].join('')
                             }
-                          },
-                          error:function(ret){
-                            self.defaults.ajax.onError(ret,self.callbacks.create.onError);
-                          }
-                        });//end ajax
 
-                    }).on('click','.ico-trash',function(){
-                        // var data = self.ordersDt.row($(this).parents('tr')).data();
-                        // self.delete(data.id);
-                    });
+                            return '';
+                        }
+                    },
+                    {
+                        targets: "__dt_status",
+                        render: function (data, type, row, y) {
+                            if(data) {
+                                if(data.status == 'PAID')
+                                    return 'Pago'
 
-                },
-                error: (err) => {
-                }
+                                if(data.status == 'REVERTED')
+                                    return 'Devolvido'
+
+                                return 'Aguardando pagamento'
+                            }
+
+                            return '';
+                        }
+                    },
+                    {
+                        targets: "__dt_dt-pagamento",
+                        render: function (data, type, row, y) {
+                            if(data) {
+                                if(data.status == 'PAID'){
+                                    let date;
+                                    data.events.forEach(event => {
+                                        if(event.type == 'PAYMENT.AUTHORIZED') {
+                                            date = event.createdAt
+                                        }
+                                    });
+
+                                    date = new Date(date)
+                                    return (date.getDate() < 10 ? ('0'+date.getDate()) : date.getDate())  + '/'
+                                        + (date.getMonth() < 9 ? ('0'+(date.getMonth()+1)) : (date.getMonth()+1))  + '/'
+                                        + date.getFullYear()
+                                }
+
+                                return ''
+                            }
+
+                            return '';
+                        }
+                    },
+                    {
+                        targets:'__dt_acoes',width:"7%",className:"text-center",searchable:false,orderable:false,render:function(data,type,row,y){
+                            if(row.wirecard_data) {
+                                if(row.wirecard_data.status != 'PAID') {
+                                    return self.ordersDt.addDTButtons({
+                                        buttons:[
+                                            {ico:'ico-mail',_class: 'text-success',title:'Reenviar email para pagamento'},
+                                            {ico:'ico-trash',_class:'text-danger',title:'Excluir'},
+                                        ]});
+                                }
+
+                                return ''
+                            }
+
+                            return '';
+                        }
+                    },
+                ]
+            }).on('click','.ico-mail',function(){
+                var data = self.ordersDt.row($(this).parents('tr')).data();
+
+                $.ajax({
+                    url: '/admin/orders/send-email/'+data.id,
+                    method: 'GET',
+                    beforeSend: function(){
+                        // HoldOn.open({message:"Enviando email, aguarde...",theme:'sk-bounce'});
+                    },
+                    success: function(data){
+                    HoldOn.close();
+                    if(data.success)
+                    {
+                        swal({
+                        title:"Um email para pagamento foi enviado para "+data.order.company.email,
+                        confirmButtonText:'OK',
+                        type:"success",
+                        });
+                    }else{
+                        swal({
+                        title:"Não foi possível enviar o email para pagamento. Verifique se o email cadastrado está correto",
+                        confirmButtonText:'OK',
+                        type:"error",
+                        });
+                    }
+                    },
+                    error:function(ret){
+                    self.defaults.ajax.onError(ret,self.callbacks.create.onError);
+                    }
+                });//end ajax
+
+            }).on('click','.ico-trash',function(){
+                // var data = self.ordersDt.row($(this).parents('tr')).data();
+                // self.delete(data.id);
             });
+
         },
         error: (err) => {
+            swal({
+                title:"Não foi possível completar a operação",
+                confirmButtonText:'OK',
+                type:"error",
+            });
+
+            console.log('err', err);
         }
     });
 }
 
 function createOrder() {
     let formData = $('#order-form').serializeArray()
+
     console.log(formData);
+
     let company;
     let plan;
+    let maxPortions = 1
+    let creditCard = false
+    let boleto = false
+
     formData.forEach(element => {
         if(element.name == 'company')
             company = JSON.parse(element.value)
 
         if(element.name == 'plan')
             plan = JSON.parse(element.value)
+
+        if(element.name == 'max_portions')
+            maxPortions = element.value
+
+        if(element.name == 'credit_card')
+            creditCard = true
+
+        if(element.name == 'boleto')
+            boleto = true
     });
+
     console.log(company);
     console.log(plan);
 
-    let customer = {  
-        "ownId" : company.cnpj, 
-        "fullname" : company.razaoSocial,
-        "email" : company.email,
-        "birthDate" : '2019-01-01',
-        "taxDocument" : {  
-            "type" : "CNPJ",
-            "number" : company.cnpj
-        },
-        "phone" : {  
-            "countryCode" : "55",
-            "areaCode" : "00",
-            "number" : company.phone
-        },
-        "shippingAddress" : {  
-            "city" : company.city_id,
-            "district" : company.address2,
-            "street" : company.address,
-            "streetNumber" : company.numberApto,
-            "zipCode" : company.zipCode,
-            "state" : "TO",
-            "country" : "BRA"
-        }
-    }
-
-    let order = {  
-        "ownId" : "645345634",
-        "amount" : {  
-            "currency" : "BRL",
-        },
-        "items" : [  
-            {  
-                "product" : "Plano Palmjob :  "+plan.name,
-                "category" : "BUSINESS_AND_INDUSTRIAL",
-                "quantity" : 1,
-                "detail" : plan.description,
-                "price" : plan.amount.replace('.', '')
-            }
-        ],
-        "customer" : customer
-        
+    let data = {
+        company: company,
+        plan: plan,
+        max_portions: maxPortions,
+        plan: plan,
+        credit_card: creditCard,
+        boleto: boleto,
     }
 
     $.ajax({
-        url: 'https://sandbox.moip.com.br/v2/orders',
+        url: '/admin/orders/store',
         method: 'POST',
-        dataType: "json",
-        headers: {
-            "Authorization": "Basic "+token,
-            "Content-Type": "application/json"
-        },
-        data: JSON.stringify(order),
-        beforeSend: function(){
-            $('#order-modal').modal('hide')
-              HoldOn.open({message:"Criando pagamento, aguarde...",theme:'sk-bounce'});
+        data: data,
+        beforeSend: function() {
+          HoldOn.open({message:"Criando pagamento, aguarde...",theme:'sk-bounce'});
         },
         complete: (data) => {
         },
-        success: (res) => {
-            let maxPortions = 1
-            let creditCard = false
-            let boleto = false
-            formData.forEach(element => {
-                if(element.name == 'max_portions')
-                    maxPortions = element.value
-
-                if(element.name == 'credit_card')
-                    creditCard = true
-           
-                if(element.name == 'boleto')
-                    boleto = true
-            });
-
-            let data = {
-                company: company,
-                plan: plan,
-                formData: formData,
-                wirecardData: res
-            }
-            formData.push({
-                'name' : 'wirecard_data',
-                'value' : JSON.stringify(res) 
-            })
-
-            $.ajax({ 
-                url: '/admin/orders/store',
-                method: 'POST',
-                data: formData,
-                beforeSend: function(){
-                //   HoldOn.open({message:"Criando pagamento, aguarde...",theme:'sk-bounce'});
-                },
-                complete: (data) => {
-                },
-                success: (data) => {
-                    HoldOn.close()
-                    swal({
-                        title:"Pagamento criado com sucesso!",
-                        title:"O cliente receberá um email com o link para prosseguir com o pagamento",
-                        confirmButtonText:'OK',
-                        type:"success",
-                      });
-                },
-                error: (err) => {
-                }
-            });
-            console.log('data ', data);
+        success: (data) => {
+            $('#order-modal').modal('hide');
+            HoldOn.close();
+            swal({
+                title:"Pagamento criado com sucesso!",
+                title:"O cliente receberá um email com o link para prosseguir com o pagamento",
+                confirmButtonText:'OK',
+                type:"success",
+              });
         },
         error: (err) => {
-            console.log('data ', err);
-        }
+            $('#order-modal').modal('hide');
+            HoldOn.close();
+            swal({
+                title:"Não foi possível completar a operação",
+                confirmButtonText:'OK',
+                type:"error",
+            });
+
+            console.log('err', err);
+        },
     });
 }
 
 function view(self) {
     return {
         onSuccess: function (data) {
-
             data.id = data.cnpj;
 
             $('#cnpj').val(data.cnpj);

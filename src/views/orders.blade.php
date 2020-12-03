@@ -11,7 +11,7 @@
 </div>
 @php
 	$pkg = json_decode(file_get_contents(base_path('composer.json')),true);
-	$hasSpatie = array_has($pkg, 'require.spatie/laravel-permission');  
+	$hasSpatie = array_has($pkg, 'require.spatie/laravel-permission');
 @endphp
 @component('IntranetOne::io.components.datatable',[
     "_id" => "orders-table",
@@ -27,16 +27,12 @@
             ["title" => "Ações"],
         ]
     ])
-@endcomponent	
+@endcomponent
 
 @php
     $plans = Dataview\IOCompany\Plan::all();
     $companies = Dataview\IOCompany\Company::all();
-    $token = base64_encode(config('wirecard.token').':'.config('wirecard.key'));
 @endphp
-<script>
-    var token = @php echo json_encode($token); @endphp 
-</script>
 <div id="order-modal" class="modal" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
