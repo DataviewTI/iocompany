@@ -278,7 +278,7 @@ new IOService({
 			'birthday': {
 			  validators: {
 				notEmpty: {
-				  enabled: true,
+				  enabled: false,
 				  message: 'Informe a sua data de nascimento!'
 				}
 			  }
@@ -286,7 +286,7 @@ new IOService({
 			'cpf': {
 			  validators: {
 				notEmpty: {
-				  enabled: true,
+				  enabled: false,
 				  message: 'Informe o CPF!'
 				},
 				id: {
@@ -298,7 +298,7 @@ new IOService({
 			'rg': {
 			  validators: {
 				notEmpty: {
-				  enabled: true,
+				  enabled: false,
 				  message: 'Informe o RG!'
 				}
 			  }
@@ -306,7 +306,7 @@ new IOService({
 			'cnh': {
 			  validators: {
 				notEmpty: {
-				  enabled: true,
+				  enabled: false,
 				  message: 'Informe o CNH!'
 				}
 			  }
@@ -314,7 +314,7 @@ new IOService({
 			'marital_status': {
 			  validators: {
 				notEmpty: {
-				  enabled: true,
+				  enabled: false,
 				  message: 'Informe o estado civil!'
 				}
 			  }
@@ -322,7 +322,7 @@ new IOService({
 			'children_amount': {
 			  validators: {
 				notEmpty: {
-				  enabled: true,
+				  enabled: false,
 				  message: 'Informe o número de filhos!'
 				}
 			  }
@@ -330,7 +330,7 @@ new IOService({
 			'phone': {
 			  validators: {
 				notEmpty: {
-				  enabled: true,
+				  enabled: false,
 				  message: 'Informe o telefone!'
 				}
 			  }
@@ -338,7 +338,7 @@ new IOService({
 			'mobile': {
 			  validators: {
 				notEmpty: {
-				  enabled: true,
+				  enabled: false,
 				  message: 'Informe o celular!'
 				}
 			  }
@@ -354,7 +354,7 @@ new IOService({
 			'address_street': {
 			  validators: {
 				notEmpty: {
-				  enabled: true,
+				  enabled: false,
 				  message: 'Informe o endereço completo!'
 				}
 			  }
@@ -362,7 +362,7 @@ new IOService({
 			'address_district': {
 			  validators: {
 				notEmpty: {
-				  enabled: true,
+				  enabled: false,
 				  message: 'Informe o endereço completo!'
 				}
 			  }
@@ -370,7 +370,7 @@ new IOService({
 			'address_number': {
 			  validators: {
 				notEmpty: {
-				  enabled: true,
+				  enabled: false,
 				  message: 'Informe o endereço completo!'
 				}
 			  }
@@ -378,7 +378,7 @@ new IOService({
 			'address_city': {
 			  validators: {
 				notEmpty: {
-				  enabled: true,
+				  enabled: false,
 				  message: 'Informe o endereço completo!'
 				}
 			  }
@@ -386,7 +386,7 @@ new IOService({
 			'address_state': {
 			  validators: {
 				notEmpty: {
-				  enabled: true,
+				  enabled: false,
 				  message: 'Informe o endereço completo!'
 				}
 			  }
@@ -394,7 +394,7 @@ new IOService({
 			'gender': {
 			  validators: {
 				notEmpty: {
-				  enabled: true,
+				  enabled: false,
 				  message: 'Informe o sexo!'
 				}
 			  }
@@ -410,7 +410,7 @@ new IOService({
 			'salary': {
 			  validators: {
 				notEmpty: {
-				  enabled: true,
+				  enabled: false,
 				  message: 'Informe a pretensão salarial!'
 				}
 			  }
@@ -496,7 +496,7 @@ new IOService({
 		  'degree': {
 			validators: {
 			  notEmpty: {
-				enabled: true,
+				enabled: false,
 				message: 'Informe sua escolaridade!'
 			  }
 			}
