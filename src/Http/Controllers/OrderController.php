@@ -86,8 +86,6 @@ class OrderController extends IOController
      */
     public function store(Request $request)
     {
-        $token = base64_encode(config('wirecard.token').':'.config('wirecard.key'));
-
         $order = [
             'company_cnpj' => $request['company']['cnpj'],
             'plan_id' => $request['plan']['id'],
@@ -104,74 +102,16 @@ class OrderController extends IOController
 
         $order = Order::create($order);
 
-        try {
-            $http = new \GuzzleHttp\Client;
+        $payment = $order->createPayment();
 
-            $res = $http->post(config('wirecard.endpoint').'/v2/orders',[
-                'headers' => [
-                    'Authorization' => 'Basic '.$token,
-                ],
-                'json' => [
-                    'ownId' => $order->id,
-                    'amount' => [
-                        'currency' => 'BRL',
-                    ],
-                    'items' => [
-                        [
-                            'product' => 'Plano Palmjob =>  '.$order->plan->name,
-                            'category' => 'BUSINESS_AND_INDUSTRIAL',
-                            'quantity' => 1,
-                            'detail' => $order->plan->description,
-                            'price' => str_replace('.', '', $order->plan->amount)
-                        ]
-                    ],
-                    'checkoutPreferences' => [
-                        'redirectUrls' => [
-                            'urlSuccess' => config('app.url').'/payment-success'
-                        ]
-                    ],
-                    'customer' => [
-                        'ownId' => $order->company->cnpj,
-                        'fullname' => $order->company->razaoSocial,
-                        'email' => $order->company->email,
-                        'birthDate' => '2019-01-01',
-                        'taxDocument' => [
-                            'type' => 'CNPJ',
-                            'number' => $order->company->cnpj
-                        ],
-                        'phone' => [
-                            'countryCode' => '55',
-                            'areaCode' => '00',
-                            'number' => $order->company->phone
-                        ],
-                        'shippingAddress' => [
-                            'city' => $order->company->city_id,
-                            'district' => $order->company->address2,
-                            'street' => $order->company->address,
-                            'streetNumber' => $order->company->numberApto,
-                            'zipCode' => $order->company->zipCode,
-                            'state' => $order->company->city->state,
-                            'country' => 'BRA'
-                        ]
-                    ],
-                ]
-            ]);
-
-            $ret = json_decode($res->getBody());
-
-            $order->update([
-                'wirecard_data' => json_encode($ret)
-            ]);
-        } catch (\GuzzleHttp\Exception\BadResponseException $e) {
-            report($e);
-            return response()->json(['success'=>false, 'error' => $e->getMessage()]);
-        }
+        if(!$payment['success'])
+            return response()->json(['success'=>false, 'data'=>$payment['data']]);
 
         if($order) {
             $order->sendPaymentEmail();
         }
 
-        return response()->json(['success'=>$order]);
+        return response()->json(['success'=>true]);
     }
 
     /**

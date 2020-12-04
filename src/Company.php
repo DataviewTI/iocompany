@@ -26,10 +26,10 @@ class Company extends Authenticatable implements AuditableContract
   public function getAppend($index){
 		return $this->appends[$index];
   }
-  
+
   public static function pkgAddr($addr){
     return __DIR__.'/'.$addr;
-  } 
+  }
   // ---------------------------------------
 
   protected  $primaryKey = 'cnpj';
@@ -55,7 +55,8 @@ class Company extends Authenticatable implements AuditableContract
     'password',
     'last_login',
     'remember_token',
-    'active', 
+    'active',
+    'due_date',
   ];
 
   protected $appends = [
@@ -81,7 +82,7 @@ class Company extends Authenticatable implements AuditableContract
   }
 
   public static function boot(){
-    parent::boot(); 
+    parent::boot();
     static::created(function (Company $obj) {
         if($obj->getAppend("group") !== false){
           $group = new Group([
@@ -92,6 +93,6 @@ class Company extends Authenticatable implements AuditableContract
           $obj->group()->associate($group)->save();
       }
     });
-    
+
   }
 }

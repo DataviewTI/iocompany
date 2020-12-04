@@ -56,6 +56,79 @@ class Order extends Model implements AuditableContract
     }
 
     public function paymentLink() {
+        if($this->wirecard_data != null) {
+            return \json_decode($this->wirecard_data, true)['_links']['checkout']['payCheckout']['redirectHref'];
+        }
 
+        return '';
+    }
+
+    public function createPayment() {
+        $token = base64_encode(config('wirecard.token').':'.config('wirecard.key'));
+
+        try {
+            $http = new \GuzzleHttp\Client;
+
+            $res = $http->post(config('wirecard.endpoint').'/v2/orders',[
+                'headers' => [
+                    'Authorization' => 'Basic '.$token,
+                ],
+                'json' => [
+                    'ownId' => $this->id,
+                    'amount' => [
+                        'currency' => 'BRL',
+                    ],
+                    'items' => [
+                        [
+                            'product' => 'Plano Trampo Jobs '.$this->plan->name,
+                            'category' => 'BUSINESS_AND_INDUSTRIAL',
+                            'quantity' => 1,
+                            'detail' => $this->plan->description,
+                            'price' => str_replace('.', '', $this->plan->amount)
+                        ]
+                    ],
+                    'checkoutPreferences' => [
+                        'redirectUrls' => [
+                            'urlSuccess' => config('app.url').'/payment-success'
+                        ]
+                    ],
+                    'customer' => [
+                        'ownId' => $this->company->cnpj,
+                        'fullname' => $this->company->razaoSocial,
+                        'email' => $this->company->email,
+                        'birthDate' => '2019-01-01',
+                        'taxDocument' => [
+                            'type' => 'CNPJ',
+                            'number' => $this->company->cnpj
+                        ],
+                        'phone' => [
+                            'countryCode' => '55',
+                            'areaCode' => '00',
+                            'number' => $this->company->phone
+                        ],
+                        'shippingAddress' => [
+                            'city' => $this->company->city_id,
+                            'district' => $this->company->address2,
+                            'street' => $this->company->address,
+                            'streetNumber' => $this->company->numberApto,
+                            'zipCode' => $this->company->zipCode,
+                            'state' => $this->company->city->state,
+                            'country' => 'BRA'
+                        ]
+                    ],
+                ]
+            ]);
+
+            $ret = json_decode($res->getBody());
+
+            $this->update([
+                'wirecard_data' => json_encode($ret)
+            ]);
+
+            return ['success'=>true, 'data' => $ret];
+        } catch (\GuzzleHttp\Exception\BadResponseException $e) {
+            report($e);
+            return ['success'=>false, 'error' => $e->getMessage()];
+        }
     }
 }
