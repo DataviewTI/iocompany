@@ -17,6 +17,9 @@ class CompanyRequest extends IORequest
     $input['cnpj'] =  preg_replace("/[^0-9]/", "",$input['cnpj']);
     $input['city_id'] =  $input['__city'];
 
+    if(isset($input['due_date_submit']))
+        $input['due_date'] = $input['due_date_submit'];
+
     $this->replace($input);
 	}
 

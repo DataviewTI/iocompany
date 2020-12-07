@@ -17,6 +17,12 @@ function (self) {
         }
     });
 
+	$('#due_date').pickadate({
+        formatSubmit: 'yyyy-mm-dd 00:00:00',
+      }).pickadate('picker').on('set', function (t) {
+        self.fv[0].revalidateField('due_date');
+    });
+
     if ($('#recruiter').length) {
         $('#recruiter').attrchange(function (attrName) {
             if (attrName == 'aria-pressed') {
@@ -73,6 +79,10 @@ function (self) {
             data: 'active',
             name: 'active'
         },
+		{
+		  data: 'due_date',
+		  name: 'due_date'
+		},
         {
             data: 'actions',
             name: 'actions'
@@ -118,6 +128,19 @@ function (self) {
             }
 
         },
+		{
+		  targets: '__dt_ativo-ate',
+		  width: "7%",
+		  className: "text-center",
+		  orderable: true,
+		  render: function (data, type, row, y) {
+			if(data) {
+				return moment(data).format('DD/MM/YYYY');
+			} else {
+				return '';
+			}
+		  }
+		},
         {
             targets: '__dt_acoes',
             width: "7%",
@@ -241,6 +264,14 @@ function (self) {
                                 message: 'cnpj inválido',
                             }
                         }
+                    },
+                    'due_date': {
+                      validators: {
+                        notEmpty: {
+                          enabled: false,
+                          message: 'Informe a data limite!'
+                        }
+                      }
                     },
                     'phone': {
                         validators: {
@@ -665,6 +696,8 @@ function view(self) {
             $('#email').val(data.email);
             $('#zipCode').val(data.zipCode);
             $('#numberApto').val(data.numberApto);
+
+	        $("#due_date").pickadate('picker').set('select', new Date(data.due_date));
 
             $("#active").aaToggle(data.active == 0 ? false : true);
             $("#recruiter").aaToggle(function (data) {

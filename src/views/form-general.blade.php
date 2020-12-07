@@ -9,18 +9,25 @@
       <input name = 'cnpj' type = 'text' id = 'cnpj' class = 'form-control form-control-lg' />
     </div>
   </div>
-  <div class="col-sm-5 col-12">
+  <div class="col-sm-3 col-12">
     <div class="form-group">
       <label for = 'razaoSocial' class="bmd-label-floating __required">Razão Social</label>
       <input name = 'razaoSocial' type = 'text' id = 'razaoSocial' class = 'form-control form-control-lg' />
     </div>
   </div>
-  <div class="col-sm-4 col-12 pr-0">
+  <div class="col-sm-3 col-12 pr-0">
     <div class="form-group">
       <label for = 'nomeFantasia' class="bmd-label-floating __required">Nome Fantasia</label>
       <input name = 'nomeFantasia' type = 'text' id = 'nomeFantasia' class = 'form-control form-control-lg' />
     </div>
   </div>
+    <div class="col-sm-3 col-12 pr-0">
+        <div class="form-group">
+        <label for = 'due_date' class="bmd-label-floating __required">Ativo até</label>
+        <input type="text" class="form-control form-control-lg" id="due_date" name = 'due_date'>
+        </div>
+    </div>
+
 </div>
 
 <div class = 'row'>

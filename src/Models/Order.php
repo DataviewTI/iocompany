@@ -80,7 +80,7 @@ class Order extends Model implements AuditableContract
                     ],
                     'items' => [
                         [
-                            'product' => 'Plano Trampo Jobs '.$this->plan->name,
+                            'product' => 'Plano Empresarial Trampo Jobs '.$this->plan->name,
                             'category' => 'BUSINESS_AND_INDUSTRIAL',
                             'quantity' => 1,
                             'detail' => $this->plan->description,
@@ -89,7 +89,7 @@ class Order extends Model implements AuditableContract
                     ],
                     'checkoutPreferences' => [
                         'redirectUrls' => [
-                            'urlSuccess' => config('app.url').'/payment-success'
+                            'urlSuccess' => config('app.url').'/empresa/login'
                         ]
                     ],
                     'customer' => [

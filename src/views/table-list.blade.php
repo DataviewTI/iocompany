@@ -8,9 +8,9 @@
 </div>
   @php
 	$pkg = json_decode(file_get_contents(base_path('composer.json')),true);
-	$hasSpatie = array_has($pkg, 'require.spatie/laravel-permission');  
+	$hasSpatie = array_has($pkg, 'require.spatie/laravel-permission');
 @endphp
-@if ($hasSpatie) 
+@if ($hasSpatie)
 	@component('IntranetOne::io.components.datatable',[
 		"_id" => "default-table",
 		"_columns"=> [
@@ -19,12 +19,13 @@
 				["title" => "Nome Fantasia"],
 				["title" => "Email"],
 				["title" => "Ativo?"],
+				["title" => "Ativo até"],
 				["title" => "Recrutador?"],
 				["title" => "Ações"],
 			]
 		])
-	@endcomponent	
-@else 
+	@endcomponent
+@else
 	@component('IntranetOne::io.components.datatable',[
 		"_id" => "default-table",
 		"_columns"=> [
@@ -33,8 +34,9 @@
 				["title" => "Nome Fantasia"],
 				["title" => "Email"],
 				["title" => "Ativo?"],
+				["title" => "Ativo até"],
 				["title" => "Ações"],
 			]
 		])
-	@endcomponent	
+	@endcomponent
 @endif

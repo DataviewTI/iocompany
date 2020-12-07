@@ -2,6 +2,7 @@
 
 {{-- page level styles --}}
 @section('header_styles')
+<link rel="stylesheet" type="text/css" href="{{ asset('css/pickadate-full.min.css') }}">
 <link rel="stylesheet" type="text/css" href="{{ asset('io/services/io-company.min.css') }}">
 @stop
 
@@ -40,6 +41,7 @@
   @endsection
 
 @section('footer_scripts')
+    <script src="{{ asset('js/pickadate-full.min.js') }}"></script>
 	<script src="{{ asset('io/services/io-company-mix-babel.min.js') }}"></script>
 	<script src="{{ asset('io/services/io-company-mix.min.js') }}"></script>
 	<script src="{{ asset('io/services/io-company.min.js') }}"></script>
