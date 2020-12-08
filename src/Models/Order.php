@@ -66,6 +66,14 @@ class Order extends Model implements AuditableContract
     public function createPayment() {
         $token = base64_encode(config('wirecard.token').':'.config('wirecard.key'));
 
+        if(strpos($this->company->phone, '(') > -1 && strpos($this->company->phone, ')') > -1) {
+            $areaCode = \substr($this->company->phone, 1, 2);
+            $phone = \substr($this->company->phone, 5);
+        } else {
+            $areaCode = \substr($this->company->phone, 0, 2);
+            $phone = \substr($this->company->phone, 2);
+        }
+
         try {
             $http = new \GuzzleHttp\Client;
 
@@ -103,11 +111,11 @@ class Order extends Model implements AuditableContract
                         ],
                         'phone' => [
                             'countryCode' => '55',
-                            'areaCode' => '00',
-                            'number' => $this->company->phone
+                            'areaCode' => $areaCode,
+                            'number' => $phone
                         ],
                         'shippingAddress' => [
-                            'city' => $this->company->city_id,
+                            'city' => $this->company->city->city,
                             'district' => $this->company->address2,
                             'street' => $this->company->address,
                             'streetNumber' => $this->company->numberApto,
