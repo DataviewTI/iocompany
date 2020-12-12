@@ -6,10 +6,13 @@ use Dataview\IntranetOne\Group;
 use Dataview\IOCompany\CharacterSet;
 use Dataview\IOCompany\Attribute;
 use Dataview\IOCompany\Candidate;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Job extends IOModel
 {
-  protected $fillable = ['date_start', 'date_end', 'interval', 'gender', 'observations', 'hirer_info'];
+    use SoftDeletes;
+
+    protected $fillable = ['date_start', 'date_end', 'interval', 'gender', 'observations', 'hirer_info'];
 
   protected $appends = [
     'group' => false,

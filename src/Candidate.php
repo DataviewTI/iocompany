@@ -13,10 +13,12 @@ use Illuminate\Notifications\Notifiable;
 use Dataview\IOCompany\CharacterSet;
 use Dataview\IOCompany\Attribute;
 use Dataview\IOCompany\Job;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Candidate extends Authenticatable
 {
   use Notifiable;
+  use SoftDeletes;
 
   protected $fillable = [
     'id',
