@@ -50,6 +50,7 @@ class Candidate extends Authenticatable
     'pcd_group_id',
     'salary_id',
     'children_amount_id',
+    'complete_profile',
   ];
 
   public function profileEvaluation() {
