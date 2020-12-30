@@ -137,42 +137,46 @@ new IOService({
 		  data: 'cpf',
 		  name: 'cpf'
 		},
-		{
-		  data: 'apprentice',
-		  name: 'apprentice'
-		},
-		{
-		  data: 'pcd_type',
-		  name: 'pcd'
-		},
+		// {
+		//   data: 'apprentice',
+		//   name: 'apprentice'
+		// },
+		// {
+		//   data: 'pcd_type',
+		//   name: 'pcd'
+		// },
 		{
 		  data: 'actions',
 		  name: 'actions'
 		},
 	  ],
-	  columnDefs: [{
+	  columnDefs: [
+        {
+		  targets: '__dt_name',
+		  searchable: true,
+		  orderable: true
+		},
+        {
 		  targets: '__dt_id',
-		  width: "3%",
 		  class: "text-center",
 		  searchable: true,
 		  orderable: true
 		},
 		{
 		  targets: '__dt_cpf',
-		  width: "10%",
 		  searchable: true,
 		  orderable: true
 		},
 		{
-		  targets: '__dt_idade',
-		  width: "7%",
+		  targets: '__dt_dt-nascimento',
 		  className: "text-center",
 		  orderable: true,
 		  render: function (data, type, row, y) {
 			if(data) {
-				var today = moment();
-				var birthday = moment(data);
-				return today.diff(birthday, 'years');
+				// var today = moment();
+				// var birthday = moment(data);
+				// return today.diff(birthday, 'years');
+				return moment(data).format('DD/MM/YYYY');
 			} else {
 				return '';
 			}
@@ -180,7 +184,6 @@ new IOService({
 		},
 		{
 		  targets: '__dt_sexo',
-		  width: "7%",
 		  className: "text-center",
 		  orderable: true,
 		  render: function (data, type, row, y) {
@@ -192,33 +195,30 @@ new IOService({
 			  return data;
 		  }
 		},
-		{
-		  targets: '__dt_pcd',
-		  width: "7%",
-		  className: "text-center",
-		  orderable: true,
-		  render: function (data, type, row, y) {
-			if (data == null)
-			  return 'Nenhuma';
-			else
-			  return data.title;
-		  }
-		},
-		{
-		  targets: '__dt_aprendiz',
-		  width: "7%",
-		  className: "text-center",
-		  orderable: true,
-		  render: function (data, type, row, y) {
-			if (data == 'N' || data == 'n')
-			  return 'Não';
-			else if (data == 'S' || data == 's')
-			  return 'Sim';
-		  }
-		},
+		// {
+		//   targets: '__dt_pcd',
+		//   className: "text-center",
+		//   orderable: true,
+		//   render: function (data, type, row, y) {
+		// 	if (data == null)
+		// 	  return 'Nenhuma';
+		// 	else
+		// 	  return data.title;
+		//   }
+		// },
+		// {
+		//   targets: '__dt_aprendiz',
+		//   className: "text-center",
+		//   orderable: true,
+		//   render: function (data, type, row, y) {
+		// 	if (data == 'N' || data == 'n')
+		// 	  return 'Não';
+		// 	else if (data == 'S' || data == 's')
+		// 	  return 'Sim';
+		//   }
+		// },
 		{
 		  targets: '__dt_acoes',
-		  width: "7%",
 		  className: "text-center",
 		  orderable: true,
 		  render: function (data, type, row, y) {
@@ -261,6 +261,24 @@ new IOService({
         } else {
             HoldOn.close();
         }
+    });
+
+    $('#name_search').on('change', function (event) {
+        self.dt.column('name:name').search(event.target.value).draw();
+    })
+
+    $('#cpf_search').on('change', function (event) {
+        self.dt.column('cpf:name').search(event.target.value).draw();
+    })
+
+    $('#gender_search').change(function () {
+        self.dt.column('gender:name').search($(this).val()).draw();
+    })
+
+	$('#birthday_search').pickadate({
+        formatSubmit: 'yyyy-mm-dd',
+    }).pickadate('picker').on('set', function (t) {
+        self.dt.column('birthday:name').search(moment($('#birthday_search').val()).format('YYYY-MM-DD')).draw();
     });
 
 	let form = document.getElementById(self.dfId);

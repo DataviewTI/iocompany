@@ -55,6 +55,22 @@ class CandidateController extends IOController{
 
     if($request->query('draw')) {
         $candidates->limit(8)->offset($request->query('start'));
+
+        $columns = $request->query('columns');
+
+        foreach ($columns as $key => $column) {
+            if($column['name'] == 'name' && $column['search']['value'] != null)
+                $candidates->where('name', 'like', '%'.$column['search']['value'].'%');
+
+            if($column['name'] == 'gender' && $column['search']['value'] != null)
+                $candidates->where('gender', $column['search']['value']);
+
+            if($column['name'] == 'cpf' && $column['search']['value'] != null)
+                $candidates->where('cpf', 'like', '%'.$column['search']['value'].'%');
+
+            if($column['name'] == 'birthday' && $column['search']['value'] != null)
+                $candidates->where('birthday', '>=', $column['search']['value']);
+        }
     }
 
     $candidates = $candidates->orderBy('id', 'desc')->get();
