@@ -33,7 +33,9 @@ class Job extends IOModel
       'jobExperiences.jobDuration',
       'jobExperiences.resignationReason',
       'degree'
-    ]);
+    ])
+    ->join('cities', 'cities.id', '=', 'candidates.address_city')
+    ->select('candidates.*', 'cities.city as city_name', 'cities.state');
 
     if($request) {
         if($request->query('gender'))
