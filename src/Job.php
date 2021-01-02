@@ -7,6 +7,7 @@ use Dataview\IOCompany\CharacterSet;
 use Dataview\IOCompany\Attribute;
 use Dataview\IOCompany\Candidate;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Http\Request;
 
 class Job extends IOModel
 {
@@ -22,7 +23,7 @@ class Job extends IOModel
     'hirer_info' => 'array'
   ];
 
-  public function getCompatibleCandidates() {
+  public function getCompatibleCandidates(Request $request = null) {
     $characterSets = CharacterSet::all();
     $attributes = Attribute::with('characterSet')->get();
     $this->characterSetPoints = $this->getCharacterSetsPoints();
@@ -32,7 +33,38 @@ class Job extends IOModel
       'jobExperiences.jobDuration',
       'jobExperiences.resignationReason',
       'degree'
-    ])->get();
+    ]);
+
+    if($request) {
+        if($request->query('gender'))
+            $candidates->where('gender', $request->query('gender'));
+
+        if($request->query('marital_status'))
+            $candidates->where('marital_status_type_id', $request->query('marital_status'));
+
+        if($request->query('apprentice'))
+            $candidates->where('apprentice', $request->query('apprentice'));
+
+        if($request->query('degree'))
+            $candidates->where('degree_id', $request->query('degree'));
+
+        if($request->query('salary'))
+            $candidates->where('salary_id', $request->query('salary'));
+
+        if($request->query('pcd_type'))
+            $candidates->where('pcd_type_id', $request->query('pcd_type'));
+
+        if($request->query('children_amount'))
+            $candidates->where('children_amount_id', $request->query('children_amount'));
+
+        if($request->query('state'))
+            $candidates->where('state', $request->query('state'));
+
+        if($request->query('city'))
+            $candidates->where('address_city', $request->query('city'));
+    }
+
+    $candidates = $candidates->get();
 
     foreach ($candidates as $candidate) {
       $candidate->characterSetPoints = $candidate->getCharacterSetsPoints($characterSets, $attributes);
